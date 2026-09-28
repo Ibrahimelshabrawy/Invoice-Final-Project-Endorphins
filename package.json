@@ -10,7 +10,10 @@
     "start": "cross-env NODE_ENV=production node src/index.js",
     "start:prod": "cross-env NODE_ENV=production node src/index.js",
     "start:dev": "cross-env NODE_ENV=development nodemon src/index.js",
-    "build": "node -e \"console.log('Build completed')\""
+    "build": "node -e \"console.log('Build completed')\"",
+    "migrate": "node src/migrations/migrate.js",
+    "migrate:undo": "node src/migrations/migrate.js --undo",
+    "migrate:status": "node src/migrations/migrate.js --status"
   },
   "devDependencies": {
     "cross-env": "^10.1.0",
