@@ -13,17 +13,21 @@
     "build": "node -e \"console.log('Build completed')\"",
     "migrate": "node src/migrations/migrate.js",
     "migrate:undo": "node src/migrations/migrate.js --undo",
-    "migrate:status": "node src/migrations/migrate.js --status"
+    "migrate:status": "node src/migrations/migrate.js --status",
+    "create:admin": "node src/utils/createAdmin.js"
   },
   "devDependencies": {
     "cross-env": "^10.1.0",
     "nodemon": "^3.1.12"
   },
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
     "dotenv": "^18.0.4",
     "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
     "mysql2": "^3.24.4",
-    "sequelize": "^6.37.8"
+    "sequelize": "^6.37.8",
+    "zod": "^4.6.5"
   }
 }
