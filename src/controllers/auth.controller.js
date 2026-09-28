@@ -1,13 +1,10 @@
 import * as authService from '../services/auth.service.js';
-import { successResponse } from '../utils/response/success.response.js';
 
 export const login = async (req, res, next) => {
   try {
     const result = await authService.login(req.body);
 
-    return successResponse({
-      res,
-      status: 200,
+    return res.status(200).json({
       message: 'Logged in successfully',
       data: result,
     });
@@ -20,9 +17,7 @@ export const logout = async (req, res, next) => {
   try {
     await authService.logout();
 
-    return successResponse({
-      res,
-      status: 200,
+    return res.status(200).json({
       message: 'Logged out successfully',
     });
   } catch (error) {
@@ -32,9 +27,7 @@ export const logout = async (req, res, next) => {
 
 export const me = async (req, res, next) => {
   try {
-    return successResponse({
-      res,
-      status: 200,
+    return res.status(200).json({
       message: 'Admin profile retrieved successfully',
       data: {
         admin: {
@@ -55,3 +48,4 @@ export default {
   logout,
   me,
 };
+
