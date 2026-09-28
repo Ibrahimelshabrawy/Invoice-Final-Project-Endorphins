@@ -1,0 +1,26 @@
+{
+  "name": "endorphins-final-project",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "cross-env NODE_ENV=production node src/index.js",
+    "start:prod": "cross-env NODE_ENV=production node src/index.js",
+    "start:dev": "cross-env NODE_ENV=development nodemon src/index.js",
+    "build": "node -e \"console.log('Build completed')\""
+  },
+  "devDependencies": {
+    "cross-env": "^10.1.0",
+    "nodemon": "^3.1.12"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.4",
+    "express": "^5.2.1",
+    "mysql2": "^3.24.4",
+    "sequelize": "^6.37.8"
+  }
+}
