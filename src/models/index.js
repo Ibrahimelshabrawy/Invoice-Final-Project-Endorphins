@@ -17,7 +17,6 @@ import EmailTemplate from './EmailTemplate.js';
 import EmailLog from './EmailLog.js';
 import Setting from './Setting.js';
 import InvoiceNumberCounter from './InvoiceNumberCounter.js';
-import Admin from './Admin.js';
 
 
 // --- Associations ---
@@ -118,9 +117,6 @@ CouponUsage.belongsTo(Invoice, { as: 'invoice', foreignKey: 'invoice_id' });
 Invoice.hasMany(EmailLog, { as: 'emailLogs', foreignKey: 'invoice_id' });
 EmailLog.belongsTo(Invoice, { as: 'invoice', foreignKey: 'invoice_id' });
 
-// Admin <-> Invoice
-Admin.hasMany(Invoice, { as: 'invoices', foreignKey: 'created_by' });
-Invoice.belongsTo(Admin, { as: 'creator', foreignKey: 'created_by' });
 
 
 export {
@@ -142,7 +138,6 @@ export {
   EmailLog,
   Setting,
   InvoiceNumberCounter,
-  Admin,
 };
 
 export default {
@@ -164,5 +159,4 @@ export default {
   EmailLog,
   Setting,
   InvoiceNumberCounter,
-  Admin,
 };
