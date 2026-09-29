@@ -1,0 +1,343 @@
+import { Op } from 'sequelize';
+import { Service, Category, Tax, InvoiceItem, BundleItem } from '../models/index.js';
+import { ItemTypeEnum } from '../utils/enum/itemType.enum.js';
+
+/**
+ * Validates and retrieves the top-level Category for a service.
+ */
+const validateCategory = async (categoryId) => {
+  const category = await Category.findByPk(Number(categoryId));
+
+  if (!category) {
+    throw new Error('Category not found', { cause: 404 });
+  }
+
+  if (category.parentId !== null) {
+    throw new Error('categoryId must refer to a top-level category, not a subcategory', { cause: 400 });
+  }
+
+  if (!category.isActive) {
+    throw new Error('Cannot assign an inactive category to a service', { cause: 400 });
+  }
+
+  return category;
+};
+
+/**
+ * Validates and retrieves the Subcategory for a service under a specific category.
+ */
+const validateSubcategory = async (subcategoryId, parentCategoryId) => {
+  if (subcategoryId === null || subcategoryId === undefined) {
+    return null;
+  }
+
+  const subcategory = await Category.findByPk(Number(subcategoryId));
+
+  if (!subcategory) {
+    throw new Error('Subcategory not found', { cause: 404 });
+  }
+
+  if (subcategory.parentId === null) {
+    throw new Error('Provided subcategoryId is a top-level category, not a subcategory', { cause: 400 });
+  }
+
+  if (subcategory.parentId !== Number(parentCategoryId)) {
+    throw new Error('Subcategory does not belong to the selected category', { cause: 400 });
+  }
+
+  if (!subcategory.isActive) {
+    throw new Error('Cannot assign an inactive subcategory to a service', { cause: 400 });
+  }
+
+  return subcategory;
+};
+
+/**
+ * Validates and retrieves the Default Tax for a service.
+ */
+const validateTax = async (taxId) => {
+  if (taxId === null || taxId === undefined) {
+    return null;
+  }
+
+  const tax = await Tax.findByPk(Number(taxId));
+
+  if (!tax) {
+    throw new Error('Tax not found', { cause: 404 });
+  }
+
+  if (!tax.isActive) {
+    throw new Error('Cannot assign an inactive tax to a service', { cause: 400 });
+  }
+
+  return tax;
+};
+
+/**
+ * Common include options for Service queries.
+ */
+const serviceIncludes = [
+  {
+    model: Category,
+    as: 'category',
+    attributes: ['id', 'name', 'isActive'],
+  },
+  {
+    model: Category,
+    as: 'subcategory',
+    attributes: ['id', 'name', 'isActive'],
+  },
+  {
+    model: Tax,
+    as: 'defaultTax',
+    attributes: ['id', 'name', 'rate', 'isActive'],
+  },
+];
+
+/**
+ * Create a new Service.
+ * Every service must be associated with a category.
+ * Subcategory is optional.
+ */
+export const createService = async ({
+  name,
+  description,
+  unitPrice,
+  unitType,
+  categoryId,
+  subcategoryId = null,
+  defaultTaxId = null,
+  isActive = true,
+}) => {
+  const category = await validateCategory(categoryId);
+  const subcategory = await validateSubcategory(subcategoryId, category.id);
+  const tax = await validateTax(defaultTaxId);
+
+  const service = await Service.create({
+    name: name.trim(),
+    description: description ? description.trim() : null,
+    unitPrice: Number(unitPrice),
+    unitType,
+    categoryId: category.id,
+    subcategoryId: subcategory ? subcategory.id : null,
+    defaultTaxId: tax ? tax.id : null,
+    isActive,
+  });
+
+  return service;
+};
+
+/**
+ * Retrieve all Services with optional filters.
+ */
+export const getAllServices = async (query = {}) => {
+  const where = {};
+
+  if (query.categoryId) {
+    where.categoryId = Number(query.categoryId);
+  }
+
+  if (query.subcategoryId) {
+    where.subcategoryId = Number(query.subcategoryId);
+  }
+
+  if (query.isActive !== undefined) {
+    where.isActive = query.isActive === 'true' || query.isActive === true;
+  }
+
+  if (query.unitType) {
+    where.unitType = query.unitType;
+  }
+
+  if (query.search) {
+    where.name = { [Op.like]: `%${query.search.trim()}%` };
+  }
+
+  return await Service.findAll({
+    where,
+    include: serviceIncludes,
+    order: [['id', 'ASC']],
+  });
+};
+
+/**
+ * Retrieve a single Service by ID.
+ */
+export const getServiceById = async (id) => {
+  const service = await Service.findByPk(Number(id), {
+    include: serviceIncludes,
+  });
+
+  if (!service) {
+    throw new Error('Service not found', { cause: 404 });
+  }
+
+  return service;
+};
+
+/**
+ * Update an existing Service.
+ *
+ * Note on Price Snapshot:
+ * Changing the service's unitPrice here updates the master price for future invoices.
+ * All existing invoices retain their historical prices unchanged because `InvoiceItem`
+ * stores an immutable snapshot of `unit_price` at the moment of invoice creation.
+ */
+export const updateService = async (id, data) => {
+  const service = await Service.findByPk(Number(id));
+
+  if (!service) {
+    throw new Error('Service not found', { cause: 404 });
+  }
+
+  const targetCategoryId =
+    data.categoryId !== undefined ? Number(data.categoryId) : service.categoryId;
+
+  if (data.categoryId !== undefined) {
+    await validateCategory(targetCategoryId);
+    service.categoryId = targetCategoryId;
+  }
+
+  if (data.subcategoryId !== undefined) {
+    if (data.subcategoryId === null) {
+      service.subcategoryId = null;
+    } else {
+      const subcategory = await validateSubcategory(data.subcategoryId, targetCategoryId);
+      service.subcategoryId = subcategory.id;
+    }
+  } else if (data.categoryId !== undefined && service.subcategoryId) {
+    // Category was changed, but subcategoryId wasn't updated: verify compatibility
+    const existingSubcategory = await Category.findByPk(service.subcategoryId);
+    if (existingSubcategory && existingSubcategory.parentId !== targetCategoryId) {
+      throw new Error(
+        'Existing subcategory does not belong to the newly selected category. Please update subcategoryId or set it to null.',
+        { cause: 400 }
+      );
+    }
+  }
+
+  if (data.defaultTaxId !== undefined) {
+    if (data.defaultTaxId === null) {
+      service.defaultTaxId = null;
+    } else {
+      const tax = await validateTax(data.defaultTaxId);
+      service.defaultTaxId = tax.id;
+    }
+  }
+
+  if (data.name !== undefined) {
+    service.name = data.name.trim();
+  }
+
+  if (data.description !== undefined) {
+    service.description = data.description ? data.description.trim() : null;
+  }
+
+  if (data.unitPrice !== undefined) {
+    service.unitPrice = Number(data.unitPrice);
+  }
+
+  if (data.unitType !== undefined) {
+    service.unitType = data.unitType;
+  }
+
+  if (data.isActive !== undefined) {
+    service.isActive = data.isActive;
+  }
+
+  await service.save();
+
+  return service;
+};
+
+/**
+ * Deactivate a Service.
+ */
+export const deactivateService = async (id) => {
+  const service = await Service.findByPk(Number(id));
+
+  if (!service) {
+    throw new Error('Service not found', { cause: 404 });
+  }
+
+  service.isActive = false;
+  await service.save();
+
+  return service;
+};
+
+/**
+ * Activate a Service.
+ * Validates that its parent category is currently active.
+ */
+export const activateService = async (id) => {
+  const service = await Service.findByPk(Number(id), {
+    include: [{ model: Category, as: 'category' }],
+  });
+
+  if (!service) {
+    throw new Error('Service not found', { cause: 404 });
+  }
+
+  if (service.category && !service.category.isActive) {
+    throw new Error('Cannot activate service because its category is inactive', { cause: 400 });
+  }
+
+  service.isActive = true;
+  await service.save();
+
+  return service;
+};
+
+/**
+ * Delete a Service.
+ * If the service has existing invoices or is referenced in bundles,
+ * hard deletion is rejected and deactivation is required.
+ */
+export const deleteService = async (id) => {
+  const service = await Service.findByPk(Number(id));
+
+  if (!service) {
+    throw new Error('Service not found', { cause: 404 });
+  }
+
+  const invoiceItemsCount = await InvoiceItem.count({
+    where: {
+      itemType: ItemTypeEnum.SERVICE,
+      refId: service.id,
+    },
+  });
+
+  if (invoiceItemsCount > 0) {
+    throw new Error(
+      'Service has associated invoices and cannot be deleted. It must be deactivated instead.',
+      { cause: 400 }
+    );
+  }
+
+  const bundleItemsCount = await BundleItem.count({
+    where: {
+      serviceId: service.id,
+    },
+  });
+
+  if (bundleItemsCount > 0) {
+    throw new Error(
+      'Service is used in bundles and cannot be deleted. It must be deactivated instead.',
+      { cause: 400 }
+    );
+  }
+
+  await service.destroy();
+  return true;
+};
+
+export default {
+  createService,
+  getAllServices,
+  getServiceById,
+  updateService,
+  deactivateService,
+  activateService,
+  deleteService,
+};
