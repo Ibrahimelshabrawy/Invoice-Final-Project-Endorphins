@@ -4,6 +4,7 @@ import authRoutes from './auth.routes.js';
 import taxRoutes from './tax.routes.js';
 import serviceRoutes from './service.routes.js';
 import bundleRoutes from './bundle.routes.js';
+import clientRoutes from './client.routes.js';
 
 const router = Router();
 
@@ -13,5 +14,6 @@ router.use('/auth', authRoutes);
 router.use('/taxes', taxRoutes);
 router.use('/services', serviceRoutes);
 router.use('/bundles', bundleRoutes);
+router.use('/clients', clientRoutes);
 
 export default router;
