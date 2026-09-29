@@ -29,9 +29,16 @@ app.use('/api/invoicing', invoicingRoutes);
 
 // Global Error Handler
 app.use((err, req, res, next) => {
-    const status = typeof err.cause === 'number' ? err.cause : 500;
+    let status = typeof err.cause === 'number' ? err.cause : (err.status || 500);
+    let message = err.message || 'Internal Server Error';
+
+    if (err.name === 'JsonWebTokenError' || err.name === 'TokenExpiredError') {
+        status = 401;
+        message = 'Invalid Token';
+    }
+
     res.status(status).json({
-        message: err.message || 'Internal Server Error',
+        message,
         ...(err.errors && { errors: err.errors }),
         ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
     });

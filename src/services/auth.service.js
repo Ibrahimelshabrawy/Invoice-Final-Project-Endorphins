@@ -2,26 +2,12 @@ import crypto from 'crypto';
 import {
   ACCESS_SECRET_KEY,
   EXPIRES_IN,
-  ADMIN_EMAIL,
+  ADMIN_PASSWORD,
 } from '../../config.service.js';
-import Admin from '../models/Admin.js';
-import { compare_match } from '../utils/security/hash.security.js';
 import { GenerateToken } from '../utils/jwt/token.service.js';
 
-
 export const login = async ({ password }) => {
-  const admin = await Admin.findOne({ where: { email: ADMIN_EMAIL } });
-
-  if (!admin) {
-    throw new Error('Invalid credentials', { cause: 400 });
-  }
-
-  const isMatch = await compare_match({
-    plainText: password,
-    cipherText: admin.password,
-  });
-
-  if (!isMatch) {
+  if (!ADMIN_PASSWORD || password !== ADMIN_PASSWORD) {
     throw new Error('Invalid credentials', { cause: 400 });
   }
 
@@ -29,8 +15,6 @@ export const login = async ({ password }) => {
 
   const access_token = GenerateToken({
     payload: {
-      id: admin.id,
-      email: admin.email,
       role: 'admin',
     },
     secret_key: ACCESS_SECRET_KEY,
@@ -48,7 +32,6 @@ export const login = async ({ password }) => {
 export const logout = async () => {
   return true;
 };
-
 
 export default {
   login,

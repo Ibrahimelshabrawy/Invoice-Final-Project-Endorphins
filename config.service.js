@@ -26,7 +26,6 @@ export const ACCESS_SECRET_KEY = process.env.ACCESS_SECRET_KEY || 'default_acces
 export const EXPIRES_IN = process.env.EXPIRES_IN || '1d';
 export const TOKEN_PREFIX = process.env.TOKEN_PREFIX || 'admin';
 
-// Admin Credentials
-export const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@endorphins.com';
+// Admin Credentials (stored in .env only, not stored in DB)
 export const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
 

@@ -13,8 +13,7 @@
     "build": "node -e \"console.log('Build completed')\"",
     "migrate": "node src/migrations/migrate.js",
     "migrate:undo": "node src/migrations/migrate.js --undo",
-    "migrate:status": "node src/migrations/migrate.js --status",
-    "create:admin": "node src/utils/createAdmin.js"
+    "migrate:status": "node src/migrations/migrate.js --status"
   },
   "devDependencies": {
     "cross-env": "^10.1.0",
