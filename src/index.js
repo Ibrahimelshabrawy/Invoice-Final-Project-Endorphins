@@ -5,7 +5,6 @@ import { connectionDB } from './utils/database.js';
 import invoicingRoutes from './routes/invoicingRoutes.js';
 import authRoutes from './routes/auth.routes.js';
 
-
 const app = express();
 
 const corsOptions = {
@@ -24,7 +23,6 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use('/api/auth', authRoutes);
 app.use('/api/invoicing', invoicingRoutes);
 
 // Global Error Handler
