@@ -163,7 +163,6 @@ export const deleteCategory = async (id) => {
     throw new Error('Category not found', { cause: 404 });
   }
 
-  // If it's a top-level category
   if (category.parentId === null) {
     const subcategoriesCount = await Category.count({
       where: { parentId: category.id },
@@ -187,7 +186,6 @@ export const deleteCategory = async (id) => {
       );
     }
   } else {
-    // If it's a subcategory
     const servicesCount = await Service.count({
       where: {
         [Op.or]: [{ subcategoryId: category.id }, { categoryId: category.id }],

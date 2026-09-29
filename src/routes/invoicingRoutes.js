@@ -5,15 +5,16 @@ import taxRoutes from './tax.routes.js';
 import serviceRoutes from './service.routes.js';
 import bundleRoutes from './bundle.routes.js';
 import clientRoutes from './client.routes.js';
+import couponRoutes from './coupon.routes.js';
 
 const router = Router();
 
-// Invoicing route group (/api/invoicing/*)
 router.use('/categories', categoryRoutes);
 router.use('/auth', authRoutes);
 router.use('/taxes', taxRoutes);
 router.use('/services', serviceRoutes);
 router.use('/bundles', bundleRoutes);
 router.use('/clients', clientRoutes);
+router.use('/coupons', couponRoutes);
 
 export default router;

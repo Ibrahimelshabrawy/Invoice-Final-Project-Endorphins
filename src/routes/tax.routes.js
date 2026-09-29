@@ -11,7 +11,6 @@ import {
 
 const router = Router();
 
-// Tax CRUD & Status Management
 router.get('/', authenticate, Validate(taxQuerySchema), taxController.getAllTaxes);
 router.post('/', authenticate, Validate(createTaxSchema), taxController.createTax);
 router.get('/:id', authenticate, Validate(taxParamSchema), taxController.getTaxById);

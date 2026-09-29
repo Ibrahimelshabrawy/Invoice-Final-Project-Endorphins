@@ -25,7 +25,6 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use('/api/invoicing', invoicingRoutes);
 
-// Global Error Handler
 app.use((err, req, res, next) => {
     let status = typeof err.cause === 'number' ? err.cause : (err.status || 500);
     let message = err.message || 'Internal Server Error';

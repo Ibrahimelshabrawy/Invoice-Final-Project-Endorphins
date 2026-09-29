@@ -11,7 +11,6 @@ import {
 
 const router = Router();
 
-// Service CRUD & Status Management
 router.get('/', authenticate, Validate(serviceQuerySchema), serviceController.getAllServices);
 router.post('/', authenticate, Validate(createServiceSchema), serviceController.createService);
 router.get('/:id', authenticate, Validate(serviceParamSchema), serviceController.getServiceById);

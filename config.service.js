@@ -19,13 +19,11 @@ export const DB_NAME = process.env.DB_NAME;
 export const DB_USER = process.env.DB_USER;
 export const DB_PASSWORD = process.env.DB_PASSWORD;
 
-// Security & Auth Config
 export const SALT_ROUND = process.env.SALT_ROUNDS ? +process.env.SALT_ROUNDS : (process.env.SALT_ROUND ? +process.env.SALT_ROUND : 10);
 export const ENCRYPT_SECRET_KEY = process.env.ENCRYPT_SECRET_KEY || '12345678901234567890123456789012';
 export const ACCESS_SECRET_KEY = process.env.ACCESS_SECRET_KEY || 'default_access_secret_key_endorphins_2026';
 export const EXPIRES_IN = process.env.EXPIRES_IN || '1d';
 export const TOKEN_PREFIX = process.env.TOKEN_PREFIX || 'admin';
 
-// Admin Credentials (stored in .env only, not stored in DB)
 export const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
 

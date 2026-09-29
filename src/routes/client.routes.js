@@ -11,7 +11,6 @@ import {
 
 const router = Router();
 
-// Client CRUD & Searching
 router.get('/', authenticate, Validate(clientQuerySchema), clientController.getAllClients);
 router.post('/', authenticate, Validate(createClientSchema), clientController.createClient);
 router.get('/:id', authenticate, Validate(clientParamSchema), clientController.getClientById);

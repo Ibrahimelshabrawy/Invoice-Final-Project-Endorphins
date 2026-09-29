@@ -3,11 +3,7 @@ import { Service, Category, Tax, InvoiceItem, BundleItem } from '../models/index
 import { ItemTypeEnum } from '../utils/enum/itemType.enum.js';
 import { validateCategory, validateSubcategory, validateTax, serviceIncludes } from '../utils/services.util.js';
 
-/**
- * Create a new Service.
- * Every service must be associated with a category.
- * Subcategory is optional.
- */
+
 export const createService = async ({
   name,
   description,
@@ -36,9 +32,7 @@ export const createService = async ({
   return service;
 };
 
-/**
- * Retrieve all Services with optional filters.
- */
+
 export const getAllServices = async (query = {}) => {
   const where = {};
 
@@ -69,9 +63,7 @@ export const getAllServices = async (query = {}) => {
   });
 };
 
-/**
- * Retrieve a single Service by ID.
- */
+
 export const getServiceById = async (id) => {
   const service = await Service.findByPk(Number(id), {
     include: serviceIncludes,
@@ -84,14 +76,6 @@ export const getServiceById = async (id) => {
   return service;
 };
 
-/**
- * Update an existing Service.
- *
- * Note on Price Snapshot:
- * Changing the service's unitPrice here updates the master price for future invoices.
- * All existing invoices retain their historical prices unchanged because `InvoiceItem`
- * stores an immutable snapshot of `unit_price` at the moment of invoice creation.
- */
 export const updateService = async (id, data) => {
   const service = await Service.findByPk(Number(id));
 
@@ -115,7 +99,6 @@ export const updateService = async (id, data) => {
       service.subcategoryId = subcategory.id;
     }
   } else if (data.categoryId !== undefined && service.subcategoryId) {
-    // Category was changed, but subcategoryId wasn't updated: verify compatibility
     const existingSubcategory = await Category.findByPk(service.subcategoryId);
     if (existingSubcategory && existingSubcategory.parentId !== targetCategoryId) {
       throw new Error(
@@ -159,9 +142,7 @@ export const updateService = async (id, data) => {
   return service;
 };
 
-/**
- * Deactivate a Service.
- */
+
 export const deactivateService = async (id) => {
   const service = await Service.findByPk(Number(id));
 
@@ -175,10 +156,7 @@ export const deactivateService = async (id) => {
   return service;
 };
 
-/**
- * Activate a Service.
- * Validates that its parent category is currently active.
- */
+
 export const activateService = async (id) => {
   const service = await Service.findByPk(Number(id), {
     include: [{ model: Category, as: 'category' }],
@@ -198,11 +176,6 @@ export const activateService = async (id) => {
   return service;
 };
 
-/**
- * Delete a Service.
- * If the service has existing invoices or is referenced in bundles,
- * hard deletion is rejected and deactivation is required.
- */
 export const deleteService = async (id) => {
   const service = await Service.findByPk(Number(id));
 
