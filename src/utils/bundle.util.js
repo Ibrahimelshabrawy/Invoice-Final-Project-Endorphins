@@ -24,13 +24,10 @@ export const validateBundleServices = async (services, transaction = null) => {
 
     const serviceIds = services.map((item) => Number(item.serviceId));
 
-    // Check for duplicate service IDs in the payload
     const uniqueServiceIds = new Set(serviceIds);
     if (uniqueServiceIds.size !== serviceIds.length) {
         throw new Error('Bundle cannot contain duplicate services', { cause: 400 });
     }
-
-    // Validate quantities
     for (const item of services) {
         const qty = Number(item.quantity);
         if (isNaN(qty) || qty <= 0) {
@@ -40,7 +37,6 @@ export const validateBundleServices = async (services, transaction = null) => {
         }
     }
 
-    // Fetch services from DB
     const existingServices = await Service.findAll({
         where: {
             id: { [Op.in]: serviceIds },
@@ -54,7 +50,6 @@ export const validateBundleServices = async (services, transaction = null) => {
         throw new Error(`Service(s) not found with ID(s): ${missingIds.join(', ')}`, { cause: 404 });
     }
 
-    // Verify all services are active
     const inactiveServices = existingServices.filter((s) => !s.isActive);
     if (inactiveServices.length > 0) {
         const inactiveNames = inactiveServices.map((s) => `"${s.name}" (ID: ${s.id})`).join(', ');

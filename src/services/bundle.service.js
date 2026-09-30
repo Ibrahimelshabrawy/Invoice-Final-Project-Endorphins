@@ -5,15 +5,6 @@ import { bundleIncludes, validateBundleServices } from '../utils/bundle.util.js'
 
 
 
-/**
- * Create a new Bundle with constituent services and quantities.
- *
- * Note on Fixed Bundle Price:
- * The bundle price is a fixed value explicitly set by the admin.
- * It is stored directly in the `bundles` table and is completely independent
- * of the underlying services' unit prices. Changing individual service prices
- * in the future will NOT alter this bundle price.
- */
 export const createBundle = async ({
   name,
   description = null,
@@ -46,9 +37,6 @@ export const createBundle = async ({
   });
 };
 
-/**
- * Retrieve all Bundles with optional query filters (isActive, search).
- */
 export const getAllBundles = async (query = {}) => {
   const where = {};
 
@@ -67,9 +55,7 @@ export const getAllBundles = async (query = {}) => {
   });
 };
 
-/**
- * Retrieve a single Bundle by ID including its items and service details.
- */
+
 export const getBundleById = async (id) => {
   const bundle = await Bundle.findByPk(Number(id), {
     include: bundleIncludes,
@@ -82,16 +68,7 @@ export const getBundleById = async (id) => {
   return bundle;
 };
 
-/**
- * Update an existing Bundle.
- *
- * Supports updating name, description, fixed price, active status,
- * and replacing the constituent services and their quantities.
- *
- * Note on Fixed Bundle Price:
- * Updating the price here sets a new fixed master price for the bundle.
- * It remains independent of individual service unit prices.
- */
+
 export const updateBundle = async (id, data) => {
   return await sequelize.transaction(async (t) => {
     const bundle = await Bundle.findByPk(Number(id), { transaction: t });
@@ -119,7 +96,6 @@ export const updateBundle = async (id, data) => {
     if (data.services !== undefined) {
       await validateBundleServices(data.services, t);
 
-      // Replace existing bundle items with the new set
       await BundleItem.destroy({
         where: { bundleId: bundle.id },
         transaction: t,
@@ -140,9 +116,7 @@ export const updateBundle = async (id, data) => {
   });
 };
 
-/**
- * Deactivate a Bundle.
- */
+
 export const deactivateBundle = async (id) => {
   const bundle = await Bundle.findByPk(Number(id));
 
@@ -156,10 +130,7 @@ export const deactivateBundle = async (id) => {
   return bundle;
 };
 
-/**
- * Activate a Bundle.
- * Ensures that all constituent services in the bundle are currently active.
- */
+
 export const activateBundle = async (id) => {
   const bundle = await Bundle.findByPk(Number(id), {
     include: [
@@ -181,7 +152,6 @@ export const activateBundle = async (id) => {
     throw new Error('Bundle not found', { cause: 404 });
   }
 
-  // Ensure all constituent services are active before activating bundle
   const inactiveServices = bundle.bundleItems
     ?.map((bi) => bi.service)
     .filter((s) => s && !s.isActive);
@@ -200,11 +170,7 @@ export const activateBundle = async (id) => {
   return bundle;
 };
 
-/**
- * Delete a Bundle.
- * If the bundle is associated with existing invoices, deletion is safely blocked
- * and the bundle must be deactivated instead.
- */
+
 export const deleteBundle = async (id) => {
   const bundle = await Bundle.findByPk(Number(id));
 

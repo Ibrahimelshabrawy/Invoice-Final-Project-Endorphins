@@ -11,7 +11,6 @@ import {
 
 const router = Router();
 
-// Bundle CRUD & Status Management
 router.get('/', authenticate, Validate(bundleQuerySchema), bundleController.getAllBundles);
 router.post('/', authenticate, Validate(createBundleSchema), bundleController.createBundle);
 router.get('/:id', authenticate, Validate(bundleParamSchema), bundleController.getBundleById);

@@ -8,9 +8,6 @@ const normalizeString = (val) => {
   return trimmed === '' ? null : trimmed;
 };
 
-/**
- * Create a new Client.
- */
 export const createClient = async ({
   name,
   company = null,
@@ -31,9 +28,6 @@ export const createClient = async ({
   return client;
 };
 
-/**
- * Retrieve all Clients with optional search and field filters.
- */
 export const getAllClients = async (query = {}) => {
   const where = {};
 
@@ -74,9 +68,7 @@ export const getAllClients = async (query = {}) => {
   });
 };
 
-/**
- * Retrieve a single Client by ID.
- */
+
 export const getClientById = async (id) => {
   const client = await Client.findByPk(Number(id));
 
@@ -87,9 +79,7 @@ export const getClientById = async (id) => {
   return client;
 };
 
-/**
- * Update an existing Client.
- */
+
 export const updateClient = async (id, data) => {
   const client = await Client.findByPk(Number(id));
 
@@ -125,10 +115,6 @@ export const updateClient = async (id, data) => {
   return client;
 };
 
-/**
- * Delete a Client.
- * If the client is associated with existing invoices, deletion is prevented.
- */
 export const deleteClient = async (id) => {
   const client = await Client.findByPk(Number(id));
 

@@ -12,7 +12,6 @@ import {
 
 const router = Router();
 
-// Category CRUD & Deactivation
 router.get('/', authenticate, categoryController.getAllCategories);
 router.get('/subcategories', authenticate, categoryController.getAllSubcategories);
 router.post('/', authenticate, Validate(createCategorySchema), categoryController.createCategory);
@@ -22,7 +21,6 @@ router.patch('/:id/deactivate', authenticate, Validate(categoryParamSchema), cat
 router.patch('/:id/activate', authenticate, Validate(categoryParamSchema), categoryController.activateCategory);
 router.delete('/:id', authenticate, Validate(categoryParamSchema), categoryController.deleteCategory);
 
-// Subcategories under a category
 router.post(
   '/:categoryId/subcategories',
   authenticate,
