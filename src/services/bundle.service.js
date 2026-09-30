@@ -37,10 +37,24 @@ export const getAllBundles = async (query = {}) => {
     where.name = { [Op.like]: `%${query.search.trim()}%` };
   }
 
-  return await Bundle.findAll({
+  const bundles = await Bundle.findAll({
     where,
     order: [['id', 'ASC']],
   });
+
+  const allServiceIds = [...new Set(bundles.flatMap((b) => b.serviceIds || []))];
+  const services = allServiceIds.length > 0
+    ? await Service.findAll({ where: { id: { [Op.in]: allServiceIds } } })
+    : [];
+
+  const serviceMap = new Map(services.map((s) => [s.id, s]));
+
+  bundles.forEach((b) => {
+    const bundleServices = (b.serviceIds || []).map((id) => serviceMap.get(id)).filter(Boolean);
+    b.setDataValue('services', bundleServices);
+  });
+
+  return bundles;
 };
 
 export const getBundleById = async (id) => {
@@ -49,6 +63,12 @@ export const getBundleById = async (id) => {
   if (!bundle) {
     throw new Error('Bundle not found', { cause: 404 });
   }
+
+  const services = (bundle.serviceIds && bundle.serviceIds.length > 0)
+    ? await Service.findAll({ where: { id: { [Op.in]: bundle.serviceIds } } })
+    : [];
+
+  bundle.setDataValue('services', services);
 
   return bundle;
 };
@@ -72,8 +92,9 @@ export const updateBundle = async (id, data) => {
     bundle.price = Number(data.price);
   }
 
-  if (data.service_ids !== undefined) {
-    const validatedIds = await validateServiceIds(data.service_ids);
+  const incomingServiceIds = data.serviceIds !== undefined ? data.serviceIds : data.service_ids;
+  if (incomingServiceIds !== undefined) {
+    const validatedIds = await validateServiceIds(incomingServiceIds);
     bundle.serviceIds = validatedIds;
   }
 
