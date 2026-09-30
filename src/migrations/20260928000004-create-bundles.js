@@ -18,6 +18,10 @@ export async function up(queryInterface, Sequelize) {
       type: Sequelize.DECIMAL(12, 2),
       allowNull: false,
     },
+    service_ids: {
+      type: Sequelize.JSON,
+      allowNull: false,
+    },
     is_active: {
       type: Sequelize.BOOLEAN,
       allowNull: false,

@@ -1,14 +1,16 @@
 import { z } from 'zod';
 
-const bundleItemInputSchema = z.object({
-  serviceId: z.coerce
-    .number({ required_error: 'Service ID is required' })
-    .int('Service ID must be an integer')
-    .positive('Service ID must be a positive integer'),
-  quantity: z.coerce
-    .number({ required_error: 'Quantity is required' })
-    .positive('Quantity must be greater than zero'),
-});
+const serviceIdsSchema = z
+  .array(
+    z.coerce
+      .number({ required_error: 'Service ID is required' })
+      .int('Service ID must be an integer')
+      .positive('Service ID must be a positive integer')
+  )
+  .min(1, 'Bundle must contain at least one service')
+  .refine((items) => new Set(items).size === items.length, {
+    message: 'Bundle cannot contain duplicate services',
+  });
 
 export const createBundleSchema = {
   body: z.object({
@@ -21,21 +23,8 @@ export const createBundleSchema = {
     price: z.coerce
       .number({ required_error: 'Bundle price is required' })
       .min(0, 'Bundle price must be non-negative'),
+    serviceIds: serviceIdsSchema,
     isActive: z.boolean().optional(),
-    services: z
-      .array(bundleItemInputSchema, {
-        required_error: 'Services array is required',
-      })
-      .min(1, 'Bundle must contain at least one service')
-      .refine(
-        (items) => {
-          const ids = items.map((item) => Number(item.serviceId));
-          return new Set(ids).size === ids.length;
-        },
-        {
-          message: 'Bundle cannot contain duplicate services',
-        }
-      ),
   }),
 };
 
@@ -56,20 +45,8 @@ export const updateBundleSchema = {
         .number()
         .min(0, 'Bundle price must be non-negative')
         .optional(),
+      serviceIds: serviceIdsSchema.optional(),
       isActive: z.boolean().optional(),
-      services: z
-        .array(bundleItemInputSchema)
-        .min(1, 'Bundle must contain at least one service')
-        .refine(
-          (items) => {
-            const ids = items.map((item) => Number(item.serviceId));
-            return new Set(ids).size === ids.length;
-          },
-          {
-            message: 'Bundle cannot contain duplicate services',
-          }
-        )
-        .optional(),
     })
     .refine((data) => Object.keys(data).length > 0, {
       message: 'At least one field must be provided for update',

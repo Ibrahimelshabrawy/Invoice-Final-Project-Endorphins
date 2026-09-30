@@ -37,15 +37,15 @@ export async function up(queryInterface, Sequelize) {
       type: Sequelize.DECIMAL(12, 2),
       allowNull: false,
     },
-    coupon_id: {
-      type: Sequelize.INTEGER,
+    discount_type: {
+      type: Sequelize.ENUM('PERCENTAGE', 'FIXED'),
       allowNull: true,
-      references: {
-        model: 'coupons',
-        key: 'id',
-      },
-      onUpdate: 'CASCADE',
-      onDelete: 'SET NULL',
+      defaultValue: null,
+    },
+    discount_value: {
+      type: Sequelize.DECIMAL(12, 2),
+      allowNull: true,
+      defaultValue: 0,
     },
     discount: {
       type: Sequelize.DECIMAL(12, 2),
@@ -93,9 +93,6 @@ export async function up(queryInterface, Sequelize) {
   });
   await queryInterface.addIndex('invoices', ['issue_date'], {
     name: 'invoices_index_9',
-  });
-  await queryInterface.addIndex('invoices', ['coupon_id'], {
-    name: 'invoices_index_10',
   });
 }
 

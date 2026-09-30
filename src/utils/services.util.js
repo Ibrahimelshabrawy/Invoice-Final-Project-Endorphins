@@ -1,4 +1,4 @@
-import { Category, Tax } from '../models/index.js';
+import { Category } from '../models/index.js';
 
 export const validateCategory = async (categoryId) => {
     const category = await Category.findByPk(Number(categoryId));
@@ -45,25 +45,6 @@ export const validateSubcategory = async (subcategoryId, parentCategoryId) => {
     return subcategory;
 };
 
-
-export const validateTax = async (taxId) => {
-    if (taxId === null || taxId === undefined) {
-        return null;
-    }
-
-    const tax = await Tax.findByPk(Number(taxId));
-
-    if (!tax) {
-        throw new Error('Tax not found', { cause: 404 });
-    }
-
-    if (!tax.isActive) {
-        throw new Error('Cannot assign an inactive tax to a service', { cause: 400 });
-    }
-
-    return tax;
-};
-
 export const serviceIncludes = [
     {
         model: Category,
@@ -74,10 +55,5 @@ export const serviceIncludes = [
         model: Category,
         as: 'subcategory',
         attributes: ['id', 'name', 'isActive'],
-    },
-    {
-        model: Tax,
-        as: 'defaultTax',
-        attributes: ['id', 'name', 'rate', 'isActive'],
     },
 ];

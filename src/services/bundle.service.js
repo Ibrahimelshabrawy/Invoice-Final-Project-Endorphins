@@ -1,40 +1,29 @@
 import { Op } from 'sequelize';
-import { Bundle, BundleItem, Service, InvoiceItem, sequelize } from '../models/index.js';
+import { Bundle, Service, InvoiceItem } from '../models/index.js';
 import { ItemTypeEnum } from '../utils/enum/itemType.enum.js';
-import { bundleIncludes, validateBundleServices } from '../utils/bundle.util.js';
-
+import { validateServiceIds } from '../utils/bundle.util.js';
 
 
 export const createBundle = async ({
   name,
   description = null,
   price,
+  serviceIds,
   isActive = true,
-  services,
 }) => {
-  return await sequelize.transaction(async (t) => {
-    await validateBundleServices(services, t);
+  console.log(serviceIds);
 
-    const bundle = await Bundle.create(
-      {
-        name: name.trim(),
-        description: description ? description.trim() : null,
-        price: Number(price),
-        isActive,
-      },
-      { transaction: t }
-    );
+  const validatedIds = await validateServiceIds(serviceIds);
 
-    const bundleItemsData = services.map((item) => ({
-      bundleId: bundle.id,
-      serviceId: Number(item.serviceId),
-      quantity: Number(item.quantity),
-    }));
-
-    await BundleItem.bulkCreate(bundleItemsData, { transaction: t });
-
-    return bundle;
+  const bundle = await Bundle.create({
+    name: name.trim(),
+    description: description ? description.trim() : null,
+    price: Number(price),
+    serviceIds: validatedIds,
+    isActive,
   });
+
+  return bundle;
 };
 
 export const getAllBundles = async (query = {}) => {
@@ -50,16 +39,12 @@ export const getAllBundles = async (query = {}) => {
 
   return await Bundle.findAll({
     where,
-    include: bundleIncludes,
     order: [['id', 'ASC']],
   });
 };
 
-
 export const getBundleById = async (id) => {
-  const bundle = await Bundle.findByPk(Number(id), {
-    include: bundleIncludes,
-  });
+  const bundle = await Bundle.findByPk(Number(id));
 
   if (!bundle) {
     throw new Error('Bundle not found', { cause: 404 });
@@ -68,54 +53,38 @@ export const getBundleById = async (id) => {
   return bundle;
 };
 
-
 export const updateBundle = async (id, data) => {
-  return await sequelize.transaction(async (t) => {
-    const bundle = await Bundle.findByPk(Number(id), { transaction: t });
+  const bundle = await Bundle.findByPk(Number(id));
 
-    if (!bundle) {
-      throw new Error('Bundle not found', { cause: 404 });
-    }
+  if (!bundle) {
+    throw new Error('Bundle not found', { cause: 404 });
+  }
 
-    if (data.name !== undefined) {
-      bundle.name = data.name.trim();
-    }
+  if (data.name !== undefined) {
+    bundle.name = data.name.trim();
+  }
 
-    if (data.description !== undefined) {
-      bundle.description = data.description ? data.description.trim() : null;
-    }
+  if (data.description !== undefined) {
+    bundle.description = data.description ? data.description.trim() : null;
+  }
 
-    if (data.price !== undefined) {
-      bundle.price = Number(data.price);
-    }
+  if (data.price !== undefined) {
+    bundle.price = Number(data.price);
+  }
 
-    if (data.isActive !== undefined) {
-      bundle.isActive = data.isActive;
-    }
+  if (data.service_ids !== undefined) {
+    const validatedIds = await validateServiceIds(data.service_ids);
+    bundle.serviceIds = validatedIds;
+  }
 
-    if (data.services !== undefined) {
-      await validateBundleServices(data.services, t);
+  if (data.isActive !== undefined) {
+    bundle.isActive = data.isActive;
+  }
 
-      await BundleItem.destroy({
-        where: { bundleId: bundle.id },
-        transaction: t,
-      });
+  await bundle.save();
 
-      const bundleItemsData = data.services.map((item) => ({
-        bundleId: bundle.id,
-        serviceId: Number(item.serviceId),
-        quantity: Number(item.quantity),
-      }));
-
-      await BundleItem.bulkCreate(bundleItemsData, { transaction: t });
-    }
-
-    await bundle.save({ transaction: t });
-
-    return bundle;
-  });
+  return bundle;
 };
-
 
 export const deactivateBundle = async (id) => {
   const bundle = await Bundle.findByPk(Number(id));
@@ -130,38 +99,25 @@ export const deactivateBundle = async (id) => {
   return bundle;
 };
 
-
 export const activateBundle = async (id) => {
-  const bundle = await Bundle.findByPk(Number(id), {
-    include: [
-      {
-        model: BundleItem,
-        as: 'bundleItems',
-        include: [
-          {
-            model: Service,
-            as: 'service',
-            attributes: ['id', 'name', 'isActive'],
-          },
-        ],
-      },
-    ],
-  });
+  const bundle = await Bundle.findByPk(Number(id));
 
   if (!bundle) {
     throw new Error('Bundle not found', { cause: 404 });
   }
 
-  const inactiveServices = bundle.bundleItems
-    ?.map((bi) => bi.service)
-    .filter((s) => s && !s.isActive);
-
-  if (inactiveServices && inactiveServices.length > 0) {
-    const inactiveNames = inactiveServices.map((s) => `"${s.name}" (ID: ${s.id})`).join(', ');
-    throw new Error(
-      `Cannot activate bundle because constituent service(s) are inactive: ${inactiveNames}`,
-      { cause: 400 }
-    );
+  if (bundle.serviceIds && Array.isArray(bundle.serviceIds) && bundle.serviceIds.length > 0) {
+    const constituentServices = await Service.findAll({
+      where: { id: { [Op.in]: bundle.serviceIds } },
+    });
+    const inactiveServices = constituentServices.filter((s) => !s.isActive);
+    if (inactiveServices.length > 0) {
+      const inactiveNames = inactiveServices.map((s) => `"${s.name}" (ID: ${s.id})`).join(', ');
+      throw new Error(
+        `Cannot activate bundle because constituent service(s) are inactive: ${inactiveNames}`,
+        { cause: 400 }
+      );
+    }
   }
 
   bundle.isActive = true;
@@ -169,7 +125,6 @@ export const activateBundle = async (id) => {
 
   return bundle;
 };
-
 
 export const deleteBundle = async (id) => {
   const bundle = await Bundle.findByPk(Number(id));
@@ -192,14 +147,7 @@ export const deleteBundle = async (id) => {
     );
   }
 
-  await sequelize.transaction(async (t) => {
-    await BundleItem.destroy({
-      where: { bundleId: bundle.id },
-      transaction: t,
-    });
-
-    await bundle.destroy({ transaction: t });
-  });
+  await bundle.destroy();
 
   return true;
 };

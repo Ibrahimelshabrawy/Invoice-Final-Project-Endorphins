@@ -27,12 +27,6 @@ export const createServiceSchema = {
       .positive('Subcategory ID must be a positive integer')
       .nullable()
       .optional(),
-    defaultTaxId: z.coerce
-      .number()
-      .int('Default tax ID must be an integer')
-      .positive('Default tax ID must be a positive integer')
-      .nullable()
-      .optional(),
     isActive: z.boolean().optional(),
   }),
 };
@@ -68,12 +62,6 @@ export const updateServiceSchema = {
         .number()
         .int('Subcategory ID must be an integer')
         .positive('Subcategory ID must be a positive integer')
-        .nullable()
-        .optional(),
-      defaultTaxId: z.coerce
-        .number()
-        .int('Default tax ID must be an integer')
-        .positive('Default tax ID must be a positive integer')
         .nullable()
         .optional(),
       isActive: z.boolean().optional(),
