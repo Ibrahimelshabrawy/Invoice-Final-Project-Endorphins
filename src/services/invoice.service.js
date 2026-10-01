@@ -22,6 +22,7 @@ import {
 import CurrencyEnum from '../utils/enum/currency.enum.js';
 import LanguageEnum from '../utils/enum/language.enum.js';
 import { generateInvoicePDFBuffer } from '../utils/pdf.util.js';
+import * as tempPdfService from './tempPdf.service.js';
 
 /**
  * Creates an invoice
@@ -522,15 +523,21 @@ export const deleteInvoice = async (id) => {
 };
 
 /**
- * Generates and returns a PDF buffer for an invoice
+ * Generates and returns a PDF buffer for an invoice, storing a copy temporarily for preview/actions
  */
-export const downloadInvoicePdf = async (id) => {
+export const previewInvoicePdf = async (id) => {
   const invoice = await getInvoiceById(id);
   const pdfBuffer = await generateInvoicePDFBuffer(invoice);
+  const { tempPdfId, expiresAt, expiresInSeconds } = await tempPdfService.saveTempPdf(pdfBuffer, invoice.id);
+
   return {
     pdfBuffer,
     invoiceNumber: invoice.invoiceNumber,
     filename: `invoice-${invoice.invoiceNumber}.pdf`,
+    tempPdfId,
+    expiresAt,
+    expiresInSeconds,
+    invoiceId: invoice.id,
   };
 };
 
@@ -542,5 +549,5 @@ export default {
   updateInvoiceStatus,
   cancelInvoice,
   deleteInvoice,
-  downloadInvoicePdf,
+  previewInvoicePdf,
 };

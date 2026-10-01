@@ -20,13 +20,15 @@ EmailLog.init(
         key: 'id',
       },
     },
-    to: {
+    recipient: {
       type: DataTypes.TEXT,
       allowNull: false,
+      field: 'recipient',
     },
     cc: {
-      type: DataTypes.TEXT,
+      type: DataTypes.JSON,
       allowNull: true,
+      defaultValue: null,
     },
     sentAt: {
       type: DataTypes.DATE,
@@ -46,7 +48,7 @@ EmailLog.init(
     sequelize,
     modelName: 'EmailLog',
     tableName: 'email_logs',
-    timestamps: false,
+    timestamps: true,
     underscored: true,
     indexes: [
       {

@@ -5,5 +5,6 @@ export * from './currency.enum.js';
 export * from './language.enum.js';
 export * from './itemType.enum.js';
 export * from './emailStatus.enum.js';
+export * from './email.enum.js';
 
 
