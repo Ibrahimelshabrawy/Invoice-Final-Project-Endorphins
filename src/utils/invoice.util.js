@@ -5,10 +5,11 @@ import {
     Service,
     Bundle,
     InvoiceNumberCounter,
-    Tax
+    Tax,
 } from "../models/index.js";
 import { ItemTypeEnum } from "../utils/enum/itemType.enum.js";
 import { DiscountTypeEnum } from "../utils/enum/discountType.enum.js";
+import { INVOICE_NUMBER_FORMAT } from "../../config.service.js";
 
 /**
  * Standard includes for fetching full Invoice records
@@ -30,40 +31,75 @@ export const invoiceIncludes = [
 ];
 
 /**
- * Generates a unique, sequential, non-reusable invoice number per year (e.g. INV-2026-00001).
- * Resets sequentially each year (INV-2027-00001).
+ * Formats invoice number according to template
+ * @param {string} format Format pattern (e.g., 'INV-{year}-{number}', 'INV-{YYYY}-{00000}')
+ * @param {number|string} year Year of the invoice
+ * @param {number|string} counterNumber Sequential counter number
+ * @returns {string} Formatted invoice number
+ */
+export const formatInvoiceNumber = (format, year, counterNumber) => {
+    const sequentialNumber = String(counterNumber).padStart(5, '0');
+    if (!format || typeof format !== 'string' || !format.trim()) {
+        return `INV-${year}-${sequentialNumber}`;
+    }
+
+    let result = format.trim();
+
+    // Replace year placeholders: {year}, {YEAR}, {YYYY}, ${year}
+    result = result.replace(/\$?\{year\}|\$?\{yyyy\}/gi, String(year));
+    result = result.replace(/\$?\{yy\}/gi, String(year).slice(-2));
+
+    // Replace zero-padded templates like {00000}, {0000}
+    let hasZeros = false;
+    result = result.replace(/\{0+\}/g, (match) => {
+        hasZeros = true;
+        const len = match.length - 2;
+        return String(counterNumber).padStart(len, '0');
+    });
+
+    // Replace sequential number placeholders: {sequentialNumber}, {number}, {seq}
+    if (/\$?\{(sequentialNumber|number|seq)\}/i.test(result)) {
+        result = result.replace(/\$?\{(sequentialNumber|number|seq)\}/gi, sequentialNumber);
+    } else if (!hasZeros && !result.includes(sequentialNumber)) {
+        result = `${result}-${sequentialNumber}`;
+    }
+
+    return result;
+};
+
+/**
+ * Generates a unique, sequential, non-reusable invoice number per year based on INVOICE_NUMBER_FORMAT env.
+ * Resets sequentially each year.
  */
 export const generateSequentialInvoiceNumber = async (issueDate, transaction) => {
     const year = issueDate ? new Date(issueDate).getFullYear() : new Date().getFullYear();
 
     let counter = await InvoiceNumberCounter.findOne({
         where: { year },
-        lock: transaction.LOCK.UPDATE,
-        transaction,
+        ...(transaction ? { lock: transaction.LOCK.UPDATE, transaction } : {}),
     });
 
     if (!counter) {
         try {
             counter = await InvoiceNumberCounter.create(
                 { year, lastNumber: 1 },
-                { transaction }
+                transaction ? { transaction } : undefined
             );
         } catch (err) {
             counter = await InvoiceNumberCounter.findOne({
                 where: { year },
-                lock: transaction.LOCK.UPDATE,
-                transaction,
+                ...(transaction ? { lock: transaction.LOCK.UPDATE, transaction } : {}),
             });
             counter.lastNumber += 1;
-            await counter.save({ transaction });
+            await counter.save(transaction ? { transaction } : {});
         }
     } else {
         counter.lastNumber += 1;
-        await counter.save({ transaction });
+        await counter.save(transaction ? { transaction } : {});
     }
 
-    const sequentialNumber = String(counter.lastNumber).padStart(5, '0');
-    return `INV-${year}-${sequentialNumber}`;
+    const format = INVOICE_NUMBER_FORMAT || 'INV-{YYYY}-{NUMBER}';
+    return formatInvoiceNumber(format, year, counter.lastNumber);
 };
 
 /**

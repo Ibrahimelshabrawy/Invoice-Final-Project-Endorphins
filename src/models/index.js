@@ -10,9 +10,7 @@ import InvoiceItem from './InvoiceItem.js';
 import InvoiceTax from './InvoiceTax.js';
 import EmailTemplate from './EmailTemplate.js';
 import EmailLog from './EmailLog.js';
-import Setting from './Setting.js';
 import InvoiceNumberCounter from './InvoiceNumberCounter.js';
-
 
 // --- Associations ---
 
@@ -46,8 +44,6 @@ InvoiceTax.belongsTo(Tax, { as: 'tax', foreignKey: 'tax_id' });
 Invoice.hasMany(EmailLog, { as: 'emailLogs', foreignKey: 'invoice_id' });
 EmailLog.belongsTo(Invoice, { as: 'invoice', foreignKey: 'invoice_id' });
 
-
-
 export {
   sequelize,
   Category,
@@ -60,7 +56,6 @@ export {
   InvoiceTax,
   EmailTemplate,
   EmailLog,
-  Setting,
   InvoiceNumberCounter,
 };
 
@@ -76,6 +71,5 @@ export default {
   InvoiceTax,
   EmailTemplate,
   EmailLog,
-  Setting,
   InvoiceNumberCounter,
 };
