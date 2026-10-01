@@ -2,8 +2,8 @@ import puppeteer from 'puppeteer';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { Setting } from '../models/index.js';
 import { generateInvoiceHtml } from './invoiceTemplate.util.js';
+import { COMPANY_ADDRESS, COMPANY_EMAIL, COMPANY_LOGO, COMPANY_NAME, COMPANY_PHONE, COMPANY_TAX_NUMBER, } from '../../config.service.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -35,41 +35,22 @@ function getFileDataUri(filePath) {
 }
 
 /**
- * Fetches company settings from DB or returns defaults
+ * Fetches company configuration from environment variables or returns defaults
  */
 export const getCompanyDetails = async () => {
   const defaultLogoPath = path.join(__dirname, '../assets/logo.jpg');
+  const logoPath = COMPANY_LOGO || defaultLogoPath;
+  const logoDataUri = getFileDataUri(logoPath) || getFileDataUri(defaultLogoPath);
 
-  try {
-    const settings = await Setting.findAll();
-    const map = {};
-    for (const s of settings) {
-      map[s.key] = s.value;
-    }
-
-    const logoPath = map.COMPANY_LOGO || map.company_logo || defaultLogoPath;
-    const logoDataUri = getFileDataUri(logoPath) || getFileDataUri(defaultLogoPath);
-
-    return {
-      name: map.COMPANY_NAME || map.company_name || 'Endorphins Software Solutions',
-      address: map.COMPANY_ADDRESS || map.company_address || '123 Business Avenue, Smart Village, Cairo, Egypt',
-      phone: map.COMPANY_PHONE || map.company_phone || '+20 2 3535 0000',
-      email: map.COMPANY_EMAIL || map.company_email || 'invoicing@endorphins.io',
-      taxNumber: map.COMPANY_TAX_NUMBER || map.company_tax_number || 'EG-987-654-321',
-      logoPath,
-      logoDataUri,
-    };
-  } catch (error) {
-    return {
-      name: 'Endorphins Software Solutions',
-      address: '123 Business Avenue, Smart Village, Cairo, Egypt',
-      phone: '+20 2 3535 0000',
-      email: 'invoicing@endorphins.io',
-      taxNumber: 'EG-987-654-321',
-      logoPath: defaultLogoPath,
-      logoDataUri: getFileDataUri(defaultLogoPath),
-    };
-  }
+  return {
+    name: COMPANY_NAME || 'Endorphins Software Solutions',
+    address: COMPANY_ADDRESS || '123 Business Avenue, Smart Village, Cairo, Egypt',
+    phone: COMPANY_PHONE || '+20 2 3535 0000',
+    email: COMPANY_EMAIL || 'invoicing@endorphins.io',
+    taxNumber: COMPANY_TAX_NUMBER || 'EG-987-654-321',
+    logoPath,
+    logoDataUri,
+  };
 };
 
 /**
@@ -88,7 +69,6 @@ function getBrowserLaunchOptions() {
   };
 
   const possiblePaths = [
-    process.env.PUPPETEER_EXECUTABLE_PATH,
     'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
     'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
     'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',

@@ -6,10 +6,10 @@ import {
     Bundle,
     InvoiceNumberCounter,
     Tax,
-    Setting,
 } from "../models/index.js";
 import { ItemTypeEnum } from "../utils/enum/itemType.enum.js";
 import { DiscountTypeEnum } from "../utils/enum/discountType.enum.js";
+import { INVOICE_NUMBER_FORMAT } from "../../config.service.js";
 
 /**
  * Standard includes for fetching full Invoice records
@@ -31,7 +31,7 @@ export const invoiceIncludes = [
 ];
 
 /**
- * Formats invoice number according to setting template
+ * Formats invoice number according to template
  * @param {string} format Format pattern (e.g., 'INV-{year}-{number}', 'INV-{YYYY}-{00000}')
  * @param {number|string} year Year of the invoice
  * @param {number|string} counterNumber Sequential counter number
@@ -68,7 +68,7 @@ export const formatInvoiceNumber = (format, year, counterNumber) => {
 };
 
 /**
- * Generates a unique, sequential, non-reusable invoice number per year based on settings.
+ * Generates a unique, sequential, non-reusable invoice number per year based on INVOICE_NUMBER_FORMAT env.
  * Resets sequentially each year.
  */
 export const generateSequentialInvoiceNumber = async (issueDate, transaction) => {
@@ -98,12 +98,7 @@ export const generateSequentialInvoiceNumber = async (issueDate, transaction) =>
         await counter.save(transaction ? { transaction } : {});
     }
 
-    const formatSetting = await Setting.findOne({
-        where: { key: ['INVOICE_NUMBER_FORMAT', 'invoice_number_format'] },
-        ...(transaction ? { transaction } : {}),
-    });
-
-    const format = formatSetting?.value || 'INV-{YYYY}-{NUMBER}';
+    const format = INVOICE_NUMBER_FORMAT || 'INV-{YYYY}-{NUMBER}';
     return formatInvoiceNumber(format, year, counter.lastNumber);
 };
 
