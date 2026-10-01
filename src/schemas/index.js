@@ -4,4 +4,3 @@ export * from './tax.schema.js';
 export * from './service.schema.js';
 export * from './bundle.schema.js';
 export * from './client.schema.js';
-export * from './coupon.schema.js';

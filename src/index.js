@@ -3,7 +3,6 @@ import cors from 'cors';
 import { PORT, CORS_WHITELIST } from '../config.service.js';
 import { connectionDB } from './utils/database.js';
 import invoicingRoutes from './routes/invoicingRoutes.js';
-import authRoutes from './routes/auth.routes.js';
 
 const app = express();
 

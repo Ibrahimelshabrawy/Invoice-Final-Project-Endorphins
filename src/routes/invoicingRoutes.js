@@ -5,7 +5,7 @@ import taxRoutes from './tax.routes.js';
 import serviceRoutes from './service.routes.js';
 import bundleRoutes from './bundle.routes.js';
 import clientRoutes from './client.routes.js';
-import couponRoutes from './coupon.routes.js';
+import invoiceRoutes from './invoice.routes.js';
 
 const router = Router();
 
@@ -15,6 +15,6 @@ router.use('/taxes', taxRoutes);
 router.use('/services', serviceRoutes);
 router.use('/bundles', bundleRoutes);
 router.use('/clients', clientRoutes);
-router.use('/coupons', couponRoutes);
+router.use('/invoices', invoiceRoutes);
 
 export default router;

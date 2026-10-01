@@ -38,21 +38,6 @@ export async function up(queryInterface, Sequelize) {
       allowNull: false,
       comment: 'Price snapshot at invoice creation',
     },
-    coupon_id: {
-      type: Sequelize.INTEGER,
-      allowNull: true,
-      references: {
-        model: 'coupons',
-        key: 'id',
-      },
-      onUpdate: 'CASCADE',
-      onDelete: 'SET NULL',
-    },
-    discount: {
-      type: Sequelize.DECIMAL(12, 2),
-      allowNull: false,
-      defaultValue: 0,
-    },
     line_total: {
       type: Sequelize.DECIMAL(12, 2),
       allowNull: false,
@@ -67,9 +52,6 @@ export async function up(queryInterface, Sequelize) {
   });
   await queryInterface.addIndex('invoice_items', ['ref_id'], {
     name: 'invoice_items_index_13',
-  });
-  await queryInterface.addIndex('invoice_items', ['coupon_id'], {
-    name: 'invoice_items_index_14',
   });
 }
 

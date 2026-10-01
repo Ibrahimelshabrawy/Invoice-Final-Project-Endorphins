@@ -1,7 +1,7 @@
 import { Op } from 'sequelize';
-import { Service, Category, Tax, InvoiceItem, BundleItem } from '../models/index.js';
+import { Service, Category, InvoiceItem, Bundle } from '../models/index.js';
 import { ItemTypeEnum } from '../utils/enum/itemType.enum.js';
-import { validateCategory, validateSubcategory, validateTax, serviceIncludes } from '../utils/services.util.js';
+import { validateCategory, validateSubcategory, serviceIncludes } from '../utils/services.util.js';
 
 
 export const createService = async ({
@@ -11,12 +11,10 @@ export const createService = async ({
   unitType,
   categoryId,
   subcategoryId = null,
-  defaultTaxId = null,
   isActive = true,
 }) => {
   const category = await validateCategory(categoryId);
   const subcategory = await validateSubcategory(subcategoryId, category.id);
-  const tax = await validateTax(defaultTaxId);
 
   const service = await Service.create({
     name: name.trim(),
@@ -25,7 +23,6 @@ export const createService = async ({
     unitType,
     categoryId: category.id,
     subcategoryId: subcategory ? subcategory.id : null,
-    defaultTaxId: tax ? tax.id : null,
     isActive,
   });
 
@@ -105,15 +102,6 @@ export const updateService = async (id, data) => {
         'Existing subcategory does not belong to the newly selected category. Please update subcategoryId or set it to null.',
         { cause: 400 }
       );
-    }
-  }
-
-  if (data.defaultTaxId !== undefined) {
-    if (data.defaultTaxId === null) {
-      service.defaultTaxId = null;
-    } else {
-      const tax = await validateTax(data.defaultTaxId);
-      service.defaultTaxId = tax.id;
     }
   }
 
@@ -197,15 +185,17 @@ export const deleteService = async (id) => {
     );
   }
 
-  const bundleItemsCount = await BundleItem.count({
-    where: {
-      serviceId: service.id,
-    },
+  // Check if service is included in any bundle
+  const allBundles = await Bundle.findAll({
+    attributes: ['id', 'name', 'serviceIds'],
   });
+  const associatedBundle = allBundles.find(
+    (b) => Array.isArray(b.serviceIds) && b.serviceIds.includes(service.id)
+  );
 
-  if (bundleItemsCount > 0) {
+  if (associatedBundle) {
     throw new Error(
-      'Service is used in bundles and cannot be deleted. It must be deactivated instead.',
+      `Service is part of bundle "${associatedBundle.name}" and cannot be deleted. Remove it from the bundle first or deactivate the service.`,
       { cause: 400 }
     );
   }

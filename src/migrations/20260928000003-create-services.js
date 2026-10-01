@@ -42,16 +42,6 @@ export async function up(queryInterface, Sequelize) {
       onUpdate: 'CASCADE',
       onDelete: 'SET NULL',
     },
-    default_tax_id: {
-      type: Sequelize.INTEGER,
-      allowNull: true,
-      references: {
-        model: 'taxes',
-        key: 'id',
-      },
-      onUpdate: 'CASCADE',
-      onDelete: 'SET NULL',
-    },
     is_active: {
       type: Sequelize.BOOLEAN,
       allowNull: false,
@@ -64,9 +54,6 @@ export async function up(queryInterface, Sequelize) {
   });
   await queryInterface.addIndex('services', ['subcategory_id'], {
     name: 'services_index_2',
-  });
-  await queryInterface.addIndex('services', ['default_tax_id'], {
-    name: 'services_index_3',
   });
 }
 

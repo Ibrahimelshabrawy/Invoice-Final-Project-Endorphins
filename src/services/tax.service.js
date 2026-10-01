@@ -1,5 +1,5 @@
 import { Op } from 'sequelize';
-import { Tax, Service, InvoiceTax, InvoiceItemTax } from '../models/index.js';
+import { Tax, InvoiceTax } from '../models/index.js';
 
 export const createTax = async ({ name, rate, isActive = true }) => {
   const tax = await Tax.create({
@@ -101,28 +101,6 @@ export const deleteTax = async (id) => {
   if (invoiceTaxesCount > 0) {
     throw new Error(
       'Tax has associated invoices and cannot be deleted. It must be deactivated instead.',
-      { cause: 400 }
-    );
-  }
-
-  const invoiceItemTaxesCount = await InvoiceItemTax.count({
-    where: { taxId: tax.id },
-  });
-
-  if (invoiceItemTaxesCount > 0) {
-    throw new Error(
-      'Tax has associated invoice items and cannot be deleted. It must be deactivated instead.',
-      { cause: 400 }
-    );
-  }
-
-  const servicesCount = await Service.count({
-    where: { defaultTaxId: tax.id },
-  });
-
-  if (servicesCount > 0) {
-    throw new Error(
-      'Tax has associated services and cannot be deleted. It must be deactivated instead.',
       { cause: 400 }
     );
   }

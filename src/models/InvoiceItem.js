@@ -45,20 +45,6 @@ InvoiceItem.init(
       field: 'unit_price',
       comment: 'Price snapshot at invoice creation',
     },
-    couponId: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      field: 'coupon_id',
-      references: {
-        model: 'coupons',
-        key: 'id',
-      },
-    },
-    discount: {
-      type: DataTypes.DECIMAL(12, 2),
-      allowNull: false,
-      defaultValue: 0,
-    },
     lineTotal: {
       type: DataTypes.DECIMAL(12, 2),
       allowNull: false,
@@ -83,10 +69,6 @@ InvoiceItem.init(
       {
         name: 'invoice_items_index_13',
         fields: ['ref_id'],
-      },
-      {
-        name: 'invoice_items_index_14',
-        fields: ['coupon_id'],
       },
     ],
   }

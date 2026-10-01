@@ -47,15 +47,6 @@ Service.init(
         key: 'id',
       },
     },
-    defaultTaxId: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      field: 'default_tax_id',
-      references: {
-        model: 'taxes',
-        key: 'id',
-      },
-    },
     isActive: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
@@ -77,10 +68,6 @@ Service.init(
       {
         name: 'services_index_2',
         fields: ['subcategory_id'],
-      },
-      {
-        name: 'services_index_3',
-        fields: ['default_tax_id'],
       },
     ],
   }

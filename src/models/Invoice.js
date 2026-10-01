@@ -3,8 +3,9 @@ import sequelize from '../utils/database.js';
 import { InvoiceStatusEnum } from '../utils/enum/invoiceStatus.enum.js';
 import { CurrencyEnum } from '../utils/enum/currency.enum.js';
 import { LanguageEnum } from '../utils/enum/language.enum.js';
+import { DiscountTypeEnum } from '../utils/enum/discountType.enum.js';
 
-class Invoice extends Model {}
+class Invoice extends Model { }
 
 Invoice.init(
   {
@@ -46,14 +47,17 @@ Invoice.init(
       type: DataTypes.DECIMAL(12, 2),
       allowNull: false,
     },
-    couponId: {
-      type: DataTypes.INTEGER,
+    discountType: {
+      type: DataTypes.ENUM(...Object.values(DiscountTypeEnum)),
       allowNull: true,
-      field: 'coupon_id',
-      references: {
-        model: 'coupons',
-        key: 'id',
-      },
+      defaultValue: null,
+      field: 'discount_type',
+    },
+    discountValue: {
+      type: DataTypes.DECIMAL(12, 2),
+      allowNull: true,
+      defaultValue: 0,
+      field: 'discount_value',
     },
     discount: {
       type: DataTypes.DECIMAL(12, 2),
@@ -89,11 +93,6 @@ Invoice.init(
       allowNull: true,
       field: 'payment_terms',
     },
-    createdBy: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      field: 'created_by',
-    },
   },
   {
     sequelize,
@@ -113,10 +112,6 @@ Invoice.init(
       {
         name: 'invoices_index_9',
         fields: ['issue_date'],
-      },
-      {
-        name: 'invoices_index_10',
-        fields: ['coupon_id'],
       },
     ],
   }

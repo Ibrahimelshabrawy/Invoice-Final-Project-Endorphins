@@ -1,7 +1,7 @@
 import { DataTypes, Model } from 'sequelize';
 import sequelize from '../utils/database.js';
 
-class Bundle extends Model {}
+class Bundle extends Model { }
 
 Bundle.init(
   {
@@ -21,6 +21,12 @@ Bundle.init(
     price: {
       type: DataTypes.DECIMAL(12, 2),
       allowNull: false,
+    },
+    serviceIds: {
+      type: DataTypes.JSON,
+      allowNull: false,
+      defaultValue: [],
+      field: 'service_ids',
     },
     isActive: {
       type: DataTypes.BOOLEAN,
