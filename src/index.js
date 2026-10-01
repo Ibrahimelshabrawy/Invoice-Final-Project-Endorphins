@@ -3,6 +3,8 @@ import cors from 'cors';
 import { PORT, CORS_WHITELIST } from '../config.service.js';
 import { connectionDB } from './utils/database.js';
 import invoicingRoutes from './routes/invoicingRoutes.js';
+import { startPeriodicCleanup } from './services/tempPdf.service.js';
+import './utils/events/email.event.js';
 
 const app = express();
 
@@ -42,6 +44,9 @@ app.use((err, req, res, next) => {
 
 const startServer = async () => {
     await connectionDB();
+
+    // Start periodic background cleanup for temporary PDFs (every 5 mins, deletes > 30 mins)
+    startPeriodicCleanup(5, 30);
 
     app.listen(PORT, () => {
         console.log(`Server is running on port ${PORT}`);

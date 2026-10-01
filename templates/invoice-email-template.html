@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invoice Notification</title>
+</head>
+
+<body style="
+    margin:0;
+    padding:0;
+    background:#f3f3f3;
+    font-family:Arial, Helvetica, sans-serif;
+    color:#111111;
+">
+
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f3f3f3;">
+    <tr>
+      <td align="center" style="padding:40px 16px;">
+
+        <!-- Main Container -->
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="
+                    max-width:640px;
+                    background:#ffffff;
+                    border:1px solid #e5e5e5;
+                    border-radius:18px;
+                    overflow:hidden;
+                ">
+
+          <!-- Header -->
+          <tr>
+            <td style="
+                        padding:28px 32px;
+                        background:#111111;
+                        border-bottom:1px solid #2a2a2a;
+                    ">
+
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td valign="middle">
+
+                    <img src="cid:endorphins-logo" alt="Endorphins" width="80" height="80" style="
+                                            display:block;
+                                            width:80px;
+                                            height:80px;
+                                            border:0;
+                                            outline:none;
+                                            border-radius:14px;
+                                        ">
+
+                  </td>
+
+                  <td align="right" valign="middle">
+                    <div style="
+                                        color:#ffffff;
+                                        font-size:13px;
+                                        font-weight:bold;
+                                        letter-spacing:1.5px;
+                                    ">
+                      ENDORPHINS
+                    </div>
+
+                    <div style="
+                                        margin-top:5px;
+                                        color:#888888;
+                                        font-size:11px;
+                                        letter-spacing:1px;
+                                    ">
+                      SOFTWARE SOLUTIONS
+                    </div>
+                  </td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
+
+
+          <!-- Hero -->
+          <tr>
+            <td style="padding:42px 40px 30px;">
+
+              <div style="
+                            font-size:11px;
+                            font-weight:bold;
+                            letter-spacing:2px;
+                            color:#888888;
+                            text-transform:uppercase;
+                        ">
+                Invoice Notification
+              </div>
+
+              <h1 style="
+                            margin:12px 0 0;
+                            font-size:38px;
+                            line-height:1.1;
+                            letter-spacing:-1.5px;
+                            color:#111111;
+                        ">
+                Your invoice<br>
+                is ready.
+              </h1>
+
+              <p style="
+                            margin:18px 0 0;
+                            color:#666666;
+                            font-size:15px;
+                            line-height:1.7;
+                        ">
+                Hello {{client_name}},<br>
+                Your invoice has been generated and is ready for your review.
+              </p>
+
+            </td>
+          </tr>
+
+
+          <!-- Invoice Card -->
+          <tr>
+            <td style="padding:0 32px 10px;">
+
+              <table width="100%" cellpadding="0" cellspacing="0" style="
+                                background:#111111;
+                                border-radius:16px;
+                                overflow:hidden;
+                            ">
+                <tr>
+                  <td style="padding:28px 28px 24px;">
+
+                    <table width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td>
+                          <div style="
+                                                    color:#777777;
+                                                    font-size:10px;
+                                                    letter-spacing:1.5px;
+                                                    font-weight:bold;
+                                                ">
+                            INVOICE NUMBER
+                          </div>
+
+                          <div style="
+                                                    margin-top:8px;
+                                                    color:#ffffff;
+                                                    font-size:22px;
+                                                    font-weight:bold;
+                                                    letter-spacing:-0.5px;
+                                                ">
+                            {{invoice_id}}
+                          </div>
+                        </td>
+
+                        <td align="right" valign="top">
+                          <span style="
+                                                    display:inline-block;
+                                                    padding:7px 11px;
+                                                    border:1px solid #333333;
+                                                    border-radius:30px;
+                                                    color:#ffffff;
+                                                    font-size:10px;
+                                                    letter-spacing:1px;
+                                                    font-weight:bold;
+                                                ">
+                            INVOICE
+                          </span>
+                        </td>
+                      </tr>
+                    </table>
+
+
+                    <!-- Divider -->
+                    <div style="
+                                        height:1px;
+                                        background:#292929;
+                                        margin:25px 0;
+                                    "></div>
+
+
+                    <!-- Total -->
+                    <div style="
+                                        color:#777777;
+                                        font-size:10px;
+                                        letter-spacing:1.5px;
+                                        font-weight:bold;
+                                    ">
+                      TOTAL AMOUNT DUE
+                    </div>
+
+                    <div style="
+                                        margin-top:7px;
+                                        color:#ffffff;
+                                        font-size:34px;
+                                        line-height:1.2;
+                                        font-weight:bold;
+                                        letter-spacing:-1px;
+                                    ">
+                      {{total}}
+                    </div>
+
+
+                    <!-- Bottom Info -->
+                    <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:25px;">
+                      <tr>
+                        <td>
+                          <div style="
+                                                    color:#666666;
+                                                    font-size:10px;
+                                                    letter-spacing:1px;
+                                                ">
+                            DUE DATE
+                          </div>
+
+                          <div style="
+                                                    margin-top:5px;
+                                                    color:#ffffff;
+                                                    font-size:13px;
+                                                    font-weight:bold;
+                                                ">
+                            {{due_date}}
+                          </div>
+                        </td>
+
+                        <td align="right">
+                          <div style="
+                                                    color:#666666;
+                                                    font-size:10px;
+                                                    letter-spacing:1px;
+                                                ">
+                            CURRENCY
+                          </div>
+
+                          <div style="
+                                                    margin-top:5px;
+                                                    color:#ffffff;
+                                                    font-size:13px;
+                                                    font-weight:bold;
+                                                ">
+                            EGP
+                          </div>
+                        </td>
+                      </tr>
+                    </table>
+
+                  </td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
+
+
+          <!-- Accent -->
+          <tr>
+            <td style="padding:18px 40px 8px;">
+
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td width="70%" style="
+                                    height:3px;
+                                    background:#111111;
+                                    border-radius:5px;
+                                "></td>
+
+                  <td width="30%" style="
+                                    height:3px;
+                                    background:#eeeeee;
+                                "></td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
+
+
+          <!-- Attachment -->
+          <tr>
+            <td style="padding:25px 40px 10px;">
+
+              <table width="100%" cellpadding="0" cellspacing="0" style="
+                                background:#f6f6f6;
+                                border:1px solid #e5e5e5;
+                                border-radius:12px;
+                            ">
+                <tr>
+                  <td style="padding:18px 20px;">
+
+                    <div style="
+                                        font-size:14px;
+                                        font-weight:bold;
+                                        color:#111111;
+                                    ">
+                      📎 Invoice PDF attached
+                    </div>
+
+                    <div style="
+                                        margin-top:6px;
+                                        font-size:12px;
+                                        line-height:1.6;
+                                        color:#777777;
+                                    ">
+                      The complete invoice is attached to this email
+                      for your records.
+                    </div>
+
+                  </td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
+
+
+          <!-- CTA -->
+          <tr>
+            <td align="center" style="padding:30px 40px 38px;">
+
+              <div style="
+                            font-size:12px;
+                            color:#777777;
+                            line-height:1.6;
+                            margin-bottom:18px;
+                        ">
+                If you have any questions regarding this invoice,
+                please contact our invoicing team.
+              </div>
+
+              <a href="mailto:invoicing@endorphins.io" style="
+                                display:inline-block;
+                                padding:14px 26px;
+                                background:#111111;
+                                color:#ffffff;
+                                text-decoration:none;
+                                border-radius:9px;
+                                font-size:13px;
+                                font-weight:bold;
+                                letter-spacing:.3px;
+                            ">
+                Contact Invoicing Team
+              </a>
+
+            </td>
+          </tr>
+
+
+          <!-- Footer -->
+          <tr>
+            <td style="
+                        padding:24px 40px;
+                        background:#f7f7f7;
+                        border-top:1px solid #eeeeee;
+                    ">
+
+              <div style="
+                            color:#111111;
+                            font-size:12px;
+                            font-weight:bold;
+                        ">
+                Endorphins Software Solutions
+              </div>
+
+              <div style="
+                            margin-top:7px;
+                            color:#888888;
+                            font-size:11px;
+                            line-height:1.7;
+                        ">
+                Smart Village, Giza, Egypt<br>
+                invoicing@endorphins.io
+                &nbsp;•&nbsp;
+                +20 2 3535 0000
+              </div>
+
+              <div style="
+                            margin-top:16px;
+                            color:#aaaaaa;
+                            font-size:10px;
+                        ">
+                © 2026 Endorphins Software Solutions
+              </div>
+
+            </td>
+          </tr>
+
+        </table>
+
+      </td>
+    </tr>
+  </table>
+
+</body>
+
+</html>

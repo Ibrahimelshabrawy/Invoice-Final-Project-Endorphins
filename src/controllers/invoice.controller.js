@@ -1,4 +1,5 @@
 import * as invoiceService from '../services/invoice.service.js';
+import * as invoiceEmailService from '../services/invoiceEmail.service.js';
 import { InvoiceStatusEnum } from '../utils/enum/invoiceStatus.enum.js';
 
 export const createInvoice = async (req, res) => {
@@ -46,9 +47,6 @@ export const updateInvoiceStatus = async (req, res) => {
   });
 };
 
-
-
-
 export const cancelInvoice = async (req, res) => {
   await invoiceService.cancelInvoice(req.params.id);
 
@@ -65,14 +63,68 @@ export const deleteInvoice = async (req, res) => {
   });
 };
 
-export const downloadInvoicePdf = async (req, res) => {
-  const { pdfBuffer, filename } = await invoiceService.downloadInvoicePdf(req.params.id);
+export const previewInvoicePdf = async (req, res) => {
+  const { pdfBuffer, filename, tempPdfId, expiresAt, expiresInSeconds } = await invoiceService.previewInvoicePdf(req.params.id);
 
   res.setHeader('Content-Type', 'application/pdf');
   res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
   res.setHeader('Content-Length', pdfBuffer.length);
+  if (tempPdfId) {
+    res.setHeader('X-Temp-Pdf-Id', tempPdfId);
+    res.setHeader('X-Temp-Pdf-Expires-At', expiresAt);
+    res.setHeader('X-Temp-Pdf-Expires-In-Seconds', String(expiresInSeconds));
+    res.setHeader('Access-Control-Expose-Headers', 'X-Temp-Pdf-Id, X-Temp-Pdf-Expires-At, X-Temp-Pdf-Expires-In-Seconds');
+  }
 
   return res.end(pdfBuffer);
+};
+
+export const previewInvoice = async (req, res) => {
+  const result = await invoiceService.previewInvoicePdf(req.params.id);
+
+  return res.status(200).json({
+    message: 'Invoice PDF generated for preview',
+    data: {
+      tempPdfId: result.tempPdfId,
+      expiresAt: result.expiresAt,
+      expiresInSeconds: result.expiresInSeconds,
+      filename: result.filename,
+      invoiceId: result.invoiceId,
+    },
+  });
+};
+
+export const discardInvoice = async (req, res) => {
+  const tempPdfId = req.body?.tempPdfId || req.query?.tempPdfId;
+  const result = await invoiceEmailService.discardInvoicePdf(tempPdfId);
+
+  return res.status(200).json({
+    message: 'Temporary invoice PDF discarded successfully',
+    data: result,
+  });
+};
+
+export const sendInvoice = async (req, res) => {
+  const result = await invoiceEmailService.sendInvoiceEmail({
+    invoiceId: req.params.id,
+    tempPdfId: req.body?.tempPdfId,
+    language: req.body?.language,
+    cc: req.body?.cc,
+  });
+
+  return res.status(202).json({
+    message: 'Invoice email send request accepted',
+    data: result,
+  });
+};
+
+export const getInvoiceEmailLogs = async (req, res) => {
+  const logs = await invoiceEmailService.getInvoiceEmailLogs(req.params.id);
+
+  return res.status(200).json({
+    message: 'Invoice email logs retrieved successfully',
+    data: logs,
+  });
 };
 
 export default {
@@ -83,5 +135,9 @@ export default {
   updateInvoiceStatus,
   cancelInvoice,
   deleteInvoice,
-  downloadInvoicePdf,
+  previewInvoicePdf,
+  previewInvoice,
+  discardInvoice,
+  sendInvoice,
+  getInvoiceEmailLogs,
 };

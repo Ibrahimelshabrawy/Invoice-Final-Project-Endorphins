@@ -1,0 +1,165 @@
+import fs from 'node:fs';
+import path from 'node:path';
+
+export const SUPPORTED_PLACEHOLDERS = ['client_name', 'invoice_id', 'total', 'due_date'];
+
+const TEMPLATES_DIR = path.resolve(process.cwd(), 'templates');
+
+/**
+ * Loads predefined template based on language ('EN' or 'AR').
+ * 
+ * @param {string} language 'EN' | 'AR'
+ * @returns {string} Predefined HTML template
+ */
+export const getPredefinedTemplate = (language = 'EN') => {
+  const isArabic = String(language).toUpperCase() === 'AR';
+  const filename = isArabic ? 'invoice-email-template-ar.html' : 'invoice-email-template.html';
+  const filePath = path.join(TEMPLATES_DIR, filename);
+
+  if (!fs.existsSync(filePath)) {
+    throw new Error(`Email template file not found: ${filename}`);
+  }
+
+  return fs.readFileSync(filePath, 'utf8');
+};
+
+/**
+ * Validates that all placeholders in the provided HTML are supported.
+ * Throws an error with cause: 400 if any unsupported placeholder is found.
+ * 
+ * @param {string} html 
+ */
+export const validatePlaceholders = (html) => {
+  if (typeof html !== 'string') {
+    const error = new Error('HTML must be a string');
+    error.cause = 400;
+    throw error;
+  }
+
+  const placeholderRegex = /\{\{([^}]+)\}\}/g;
+  const unsupported = [];
+  let match;
+
+  while ((match = placeholderRegex.exec(html)) !== null) {
+    const rawKey = match[1].trim();
+    if (!SUPPORTED_PLACEHOLDERS.includes(rawKey)) {
+      unsupported.push(`{{${match[1]}}}`);
+    }
+  }
+
+  if (unsupported.length > 0) {
+    const uniqueUnsupported = [...new Set(unsupported)];
+    const error = new Error(
+      `Unsupported placeholder(s) detected: ${uniqueUnsupported.join(', ')}. Only {{client_name}}, {{invoice_id}}, {{total}}, and {{due_date}} are supported.`
+    );
+    error.cause = 400;
+    throw error;
+  }
+};
+
+/**
+ * Formats invoice total with currency (e.g., "5,000 EGP")
+ * 
+ * @param {number|string} total 
+ * @param {string} currency 
+ * @returns {string}
+ */
+export const formatTotal = (total, currency = 'EGP') => {
+  const totalNum = Number(total || 0);
+  const formattedNumber = totalNum.toLocaleString('en-US', {
+    minimumFractionDigits: totalNum % 1 !== 0 ? 2 : 0,
+    maximumFractionDigits: 2,
+  });
+  return `${formattedNumber} ${currency || 'EGP'}`;
+};
+
+/**
+ * Applies language and direction (RTL/LTR) attributes to the HTML if not already defined.
+ * 
+ * @param {string} html 
+ * @param {string} language 'EN' | 'AR'
+ * @returns {string}
+ */
+export const applyDirectionAndLanguage = (html, language = 'EN') => {
+  const isArabic = String(language).toUpperCase() === 'AR';
+  const targetDir = isArabic ? 'rtl' : 'ltr';
+  const targetLang = isArabic ? 'ar' : 'en';
+
+  if (!html || typeof html !== 'string') {
+    return html;
+  }
+
+  // If HTML contains an <html ...> tag
+  if (/<html[^>]*>/i.test(html)) {
+    return html.replace(/<html([^>]*)>/i, (match, attrs) => {
+      let newAttrs = attrs;
+      if (!/\bdir\s*=/i.test(attrs)) {
+        newAttrs = ` dir="${targetDir}"${newAttrs}`;
+      }
+      if (!/\blang\s*=/i.test(attrs)) {
+        newAttrs = ` lang="${targetLang}"${newAttrs}`;
+      }
+      return `<html${newAttrs}>`;
+    });
+  }
+
+  // If there is no <html> tag, check if root elements define dir
+  if (!/\bdir\s*=/i.test(html)) {
+    return `<div dir="${targetDir}" lang="${targetLang}">\n${html}\n</div>`;
+  }
+
+  return html;
+};
+
+/**
+ * Renders an email template by replacing supported placeholders and applying direction/language.
+ * 
+ * @param {string} html 
+ * @param {Object} invoice 
+ * @param {string} language 'EN' | 'AR'
+ * @returns {string} Rendered HTML
+ */
+export const renderEmailTemplate = (html, invoice, language = 'EN') => {
+  // 1. Validate placeholders
+  validatePlaceholders(html);
+
+  // 2. Prepare replacement values
+  const clientName = invoice.client?.name || '';
+  const invoiceId = invoice.invoiceNumber || '';
+  const total = formatTotal(invoice.total, invoice.currency);
+  const dueDate = invoice.dueDate || '';
+
+  // 3. Controlled replacements
+  let rendered = html
+    .replace(/\{\{\s*client_name\s*\}\}/g, clientName)
+    .replace(/\{\{\s*invoice_id\s*\}\}/g, invoiceId)
+    .replace(/\{\{\s*total\s*\}\}/g, total)
+    .replace(/\{\{\s*due_date\s*\}\}/g, dueDate);
+
+  // 4. Apply language and direction
+  rendered = applyDirectionAndLanguage(rendered, language);
+
+  return rendered;
+};
+
+/**
+ * Renders the predefined template for the specified language with invoice values.
+ * 
+ * @param {Object} invoice 
+ * @param {string} language 'EN' | 'AR'
+ * @returns {string}
+ */
+export const renderPredefinedEmailTemplate = (invoice, language = 'EN') => {
+  const templateHtml = getPredefinedTemplate(language);
+  return renderEmailTemplate(templateHtml, invoice, language);
+};
+
+export default {
+  SUPPORTED_PLACEHOLDERS,
+  getPredefinedTemplate,
+  validatePlaceholders,
+  formatTotal,
+  applyDirectionAndLanguage,
+  renderEmailTemplate,
+  renderPredefinedEmailTemplate,
+};

@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>إشعار الفاتورة</title>
+</head>
+
+<body style="
+    margin:0;
+    padding:0;
+    background:#f3f3f3;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, Arial, sans-serif;
+    color:#111111;
+    direction:rtl;
+    text-align:right;
+">
+
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f3f3f3; direction:rtl;">
+    <tr>
+      <td align="center" style="padding:40px 16px;">
+
+        <!-- Main Container -->
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="
+                    max-width:640px;
+                    background:#ffffff;
+                    border:1px solid #e5e5e5;
+                    border-radius:18px;
+                    overflow:hidden;
+                    direction:rtl;
+                    text-align:right;
+                ">
+
+          <!-- Header -->
+          <tr>
+            <td style="
+                        padding:28px 32px;
+                        background:#111111;
+                        border-bottom:1px solid #2a2a2a;
+                    ">
+
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td align="right" valign="middle">
+
+                    <img src="cid:endorphins-logo" alt="Endorphins" width="80" height="80" style="
+                                            display:block;
+                                            width:80px;
+                                            height:80px;
+                                            border:0;
+                                            outline:none;
+                                            border-radius:14px;
+                                        ">
+
+                  </td>
+
+                  <td align="left" valign="middle">
+                    <div style="
+                                        color:#ffffff;
+                                        font-size:13px;
+                                        font-weight:bold;
+                                        letter-spacing:1.5px;
+                                    ">
+                      ENDORPHINS
+                    </div>
+
+                    <div style="
+                                        margin-top:5px;
+                                        color:#888888;
+                                        font-size:11px;
+                                        letter-spacing:1px;
+                                    ">
+                      SOFTWARE SOLUTIONS
+                    </div>
+                  </td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
+
+
+          <!-- Hero -->
+          <tr>
+            <td style="padding:42px 40px 30px; text-align:right;">
+
+              <div style="
+                            font-size:11px;
+                            font-weight:bold;
+                            letter-spacing:1px;
+                            color:#888888;
+                        ">
+                إشعار الفاتورة
+              </div>
+
+              <h1 style="
+                            margin:12px 0 0;
+                            font-size:36px;
+                            line-height:1.2;
+                            letter-spacing:-0.5px;
+                            color:#111111;
+                        ">
+                فاتورتكم<br>
+                جاهزة للمراجعة.
+              </h1>
+
+              <p style="
+                            margin:18px 0 0;
+                            color:#666666;
+                            font-size:15px;
+                            line-height:1.8;
+                        ">
+                مرحباً {{client_name}}،<br>
+                تم إصدار فاتورتكم بنجاح وهي جاهزة للاطلاع عليها.
+              </p>
+
+            </td>
+          </tr>
+
+
+          <!-- Invoice Card -->
+          <tr>
+            <td style="padding:0 32px 10px;">
+
+              <table width="100%" cellpadding="0" cellspacing="0" style="
+                                background:#111111;
+                                border-radius:16px;
+                                overflow:hidden;
+                                direction:rtl;
+                            ">
+                <tr>
+                  <td style="padding:28px 28px 24px; text-align:right;">
+
+                    <table width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td align="right" valign="top">
+                          <div style="
+                                                    color:#777777;
+                                                    font-size:10px;
+                                                    letter-spacing:1px;
+                                                    font-weight:bold;
+                                                ">
+                            رقم الفاتورة
+                          </div>
+
+                          <div style="
+                                                    margin-top:8px;
+                                                    color:#ffffff;
+                                                    font-size:22px;
+                                                    font-weight:bold;
+                                                    letter-spacing:-0.5px;
+                                                    direction:ltr;
+                                                    text-align:right;
+                                                ">
+                            {{invoice_id}}
+                          </div>
+                        </td>
+
+                        <td align="left" valign="top">
+                          <span style="
+                                                    display:inline-block;
+                                                    padding:7px 14px;
+                                                    border:1px solid #2a2a2a;
+                                                    border-radius:30px;
+                                                    font-size:11px;
+                                                    font-weight:bold;
+                                                    letter-spacing:1px;
+                                                    color:#ffffff;
+                                                ">
+                            فاتورة
+                          </span>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <div style="
+                                        height:1px;
+                                        background:#222222;
+                                        margin:26px 0;
+                                    "></div>
+
+                    <div style="
+                                        color:#777777;
+                                        font-size:10px;
+                                        letter-spacing:1px;
+                                        font-weight:bold;
+                                    ">
+                      المبلغ الإجمالي المستحق
+                    </div>
+
+                    <div style="
+                                        margin-top:10px;
+                                        color:#ffffff;
+                                        font-size:38px;
+                                        font-weight:bold;
+                                        letter-spacing:-1px;
+                                        line-height:1;
+                                    ">
+                      {{total}}
+                    </div>
+
+                    <div style="
+                                        height:1px;
+                                        background:#222222;
+                                        margin:26px 0;
+                                    "></div>
+
+                    <table width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td align="right">
+                          <div style="
+                                                    color:#777777;
+                                                    font-size:10px;
+                                                    letter-spacing:1px;
+                                                    font-weight:bold;
+                                                ">
+                            تاريخ الاستحقاق
+                          </div>
+
+                          <div style="
+                                                    margin-top:6px;
+                                                    color:#ffffff;
+                                                    font-size:13px;
+                                                    font-weight:bold;
+                                                ">
+                            {{due_date}}
+                          </div>
+                        </td>
+
+                        <td align="left">
+                          <div style="
+                                                    color:#777777;
+                                                    font-size:10px;
+                                                    letter-spacing:1px;
+                                                    font-weight:bold;
+                                                ">
+                            العملة
+                          </div>
+
+                          <div style="
+                                                    margin-top:6px;
+                                                    color:#ffffff;
+                                                    font-size:13px;
+                                                    font-weight:bold;
+                                                ">
+                            EGP
+                          </div>
+                        </td>
+                      </tr>
+                    </table>
+
+                  </td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
+
+
+          <!-- Accent Line -->
+          <tr>
+            <td style="padding:22px 32px 6px;">
+
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td width="20%" style="
+                                        height:3px;
+                                        background:#111111;
+                                    "></td>
+                  <td width="80%" style="
+                                        height:3px;
+                                        background:#eeeeee;
+                                    "></td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
+
+
+          <!-- Attachment Notice -->
+          <tr>
+            <td style="padding:20px 32px 10px;">
+
+              <table width="100%" cellpadding="0" cellspacing="0" style="
+                                background:#f7f7f7;
+                                border:1px solid #e8e8e8;
+                                border-radius:12px;
+                                direction:rtl;
+                            ">
+                <tr>
+                  <td style="padding:18px 22px; text-align:right;">
+
+                    <div style="
+                                            color:#111111;
+                                            font-size:13px;
+                                            font-weight:bold;
+                                        ">
+                      📎 مرفق ملف الفاتورة PDF
+                    </div>
+
+                    <div style="
+                                            margin-top:6px;
+                                            color:#777777;
+                                            font-size:12px;
+                                            line-height:1.7;
+                                        ">
+                      تم إرفاق نسخة الفاتورة الكاملة بصيغة PDF مع هذه الرسالة للرجوع إليها.
+                    </div>
+
+                  </td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
+
+
+          <!-- CTA -->
+          <tr>
+            <td align="center" style="padding:30px 40px 38px;">
+
+              <div style="
+                            font-size:12px;
+                            color:#777777;
+                            line-height:1.7;
+                            margin-bottom:18px;
+                        ">
+                إذا كان لديكم أي استفسار بخصوص هذه الفاتورة، يُرجى التواصل مع فريق الفواتير لدينا.
+              </div>
+
+              <a href="mailto:invoicing@endorphins.io" style="
+                                display:inline-block;
+                                padding:14px 26px;
+                                background:#111111;
+                                color:#ffffff;
+                                text-decoration:none;
+                                border-radius:9px;
+                                font-size:13px;
+                                font-weight:bold;
+                                letter-spacing:.3px;
+                            ">
+                التواصل مع فريقنا
+              </a>
+
+            </td>
+          </tr>
+
+
+          <!-- Footer -->
+          <tr>
+            <td style="
+                        padding:24px 40px;
+                        background:#f7f7f7;
+                        border-top:1px solid #eeeeee;
+                        text-align:right;
+                    ">
+
+              <div style="
+                            color:#111111;
+                            font-size:12px;
+                            font-weight:bold;
+                        ">
+                إندورفينز للحلول البرمجية (Endorphins Software Solutions)
+              </div>
+
+              <div style="
+                            margin-top:7px;
+                            color:#888888;
+                            font-size:11px;
+                            line-height:1.8;
+                        ">
+                القرية الذكية، الجيزة، مصر<br>
+                invoicing@endorphins.io
+                &nbsp;•&nbsp;
+                +20 2 3535 0000
+              </div>
+
+              <div style="
+                            margin-top:16px;
+                            color:#aaaaaa;
+                            font-size:10px;
+                            direction:ltr;
+                            text-align:left;
+                        ">
+                © 2026 Endorphins Software Solutions
+              </div>
+
+            </td>
+          </tr>
+
+        </table>
+
+      </td>
+    </tr>
+  </table>
+
+</body>
+
+</html>

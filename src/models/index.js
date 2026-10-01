@@ -8,7 +8,6 @@ import Client from './Client.js';
 import Invoice from './Invoice.js';
 import InvoiceItem from './InvoiceItem.js';
 import InvoiceTax from './InvoiceTax.js';
-import EmailTemplate from './EmailTemplate.js';
 import EmailLog from './EmailLog.js';
 import InvoiceNumberCounter from './InvoiceNumberCounter.js';
 
@@ -54,7 +53,6 @@ export {
   Invoice,
   InvoiceItem,
   InvoiceTax,
-  EmailTemplate,
   EmailLog,
   InvoiceNumberCounter,
 };
@@ -69,7 +67,6 @@ export default {
   Invoice,
   InvoiceItem,
   InvoiceTax,
-  EmailTemplate,
   EmailLog,
   InvoiceNumberCounter,
 };
