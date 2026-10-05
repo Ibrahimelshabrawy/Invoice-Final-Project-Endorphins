@@ -38,15 +38,23 @@ export const createInvoiceSchema = {
       paymentTerms: z.string().trim().nullable().optional(),
       currency: z.nativeEnum(CurrencyEnum).optional().default(CurrencyEnum.EGP),
       language: z.nativeEnum(LanguageEnum).optional().default(LanguageEnum.EN),
-      discountValue: z.coerce
-        .number()
-        .min(0, 'Discount value must be non-negative')
-        .optional(),
-      discountType: z
-        .nativeEnum(DiscountTypeEnum, {
-          errorMap: () => ({ message: 'discountType must be PERCENTAGE or FIXED' }),
-        })
-        .optional(),
+      discountValue: z.preprocess(
+        (val) => (val === '' || val === null || val === undefined ? null : val),
+        z.coerce
+          .number()
+          .min(0, 'Discount value must be non-negative')
+          .nullable()
+          .optional()
+      ),
+      discountType: z.preprocess(
+        (val) => (val === '' || val === null || val === undefined ? null : val),
+        z
+          .nativeEnum(DiscountTypeEnum, {
+            errorMap: () => ({ message: 'discountType must be PERCENTAGE or FIXED' }),
+          })
+          .nullable()
+          .optional()
+      ),
       taxIds: z
         .array(
           z.coerce
@@ -108,17 +116,23 @@ export const updateInvoiceSchema = {
       paymentTerms: z.string().trim().nullable().optional(),
       currency: z.nativeEnum(CurrencyEnum).optional(),
       language: z.nativeEnum(LanguageEnum).optional(),
-      discountValue: z.coerce
-        .number()
-        .min(0, 'Discount value must be non-negative')
-        .nullable()
-        .optional(),
-      discountType: z
-        .nativeEnum(DiscountTypeEnum, {
-          errorMap: () => ({ message: 'discountType must be PERCENTAGE or FIXED' }),
-        })
-        .nullable()
-        .optional(),
+      discountValue: z.preprocess(
+        (val) => (val === '' || val === null || val === undefined ? null : val),
+        z.coerce
+          .number()
+          .min(0, 'Discount value must be non-negative')
+          .nullable()
+          .optional()
+      ),
+      discountType: z.preprocess(
+        (val) => (val === '' || val === null || val === undefined ? null : val),
+        z
+          .nativeEnum(DiscountTypeEnum, {
+            errorMap: () => ({ message: 'discountType must be PERCENTAGE or FIXED' }),
+          })
+          .nullable()
+          .optional()
+      ),
       taxIds: z
         .array(
           z.coerce
@@ -194,8 +208,14 @@ export const reissueInvoiceSchema = {
         .optional(),
       notes: z.string().trim().nullable().optional(),
       paymentTerms: z.string().trim().nullable().optional(),
-      discountValue: z.coerce.number().min(0).nullable().optional(),
-      discountType: z.nativeEnum(DiscountTypeEnum).nullable().optional(),
+      discountValue: z.preprocess(
+        (val) => (val === '' || val === null || val === undefined ? null : val),
+        z.coerce.number().min(0).nullable().optional()
+      ),
+      discountType: z.preprocess(
+        (val) => (val === '' || val === null || val === undefined ? null : val),
+        z.nativeEnum(DiscountTypeEnum).nullable().optional()
+      ),
       taxIds: z.array(z.coerce.number().int().positive()).optional(),
       items: z.array(itemSchema).min(1).optional(),
     })

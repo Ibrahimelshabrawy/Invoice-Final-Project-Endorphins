@@ -16,6 +16,15 @@ export const createClient = async ({
   address = null,
   taxNumber = null,
 }) => {
+
+  const existingClient = await Client.findOne({
+    where: { [Op.or]: [{ email }, { taxNumber }] },
+  });
+
+  if (existingClient) {
+    throw new Error("Client already exists with this email or tax number.", { cause: 400 });
+  }
+
   const client = await Client.create({
     name: name.trim(),
     company: normalizeString(company),

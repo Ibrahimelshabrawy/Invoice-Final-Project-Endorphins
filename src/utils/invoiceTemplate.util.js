@@ -107,6 +107,36 @@ function formatNumber(val) {
 }
 
 /**
+ * Formats address for language context.
+ * In Arabic (RTL), ensures "The Bun" is positioned after "مطعم" as expected.
+ * In English, preserves original address untouched.
+ */
+export function formatAddressForLanguage(address, isArabic) {
+  if (!address || typeof address !== 'string') return '';
+  if (!isArabic) return address;
+
+  const theBunPattern = /the\s+bun/i;
+  if (theBunPattern.test(address) && address.includes('مطعم')) {
+    const bunIndex = address.search(theBunPattern);
+    const matamIndex = address.indexOf('مطعم');
+    if (bunIndex !== -1 && matamIndex !== -1 && bunIndex < matamIndex) {
+      const match = address.match(theBunPattern)[0];
+      const cleaned = address
+        .replace(new RegExp(`\\s*${match}\\s*[,،]?\\s*`, 'i'), '')
+        .trim();
+
+      if (/مطعم\s*$/.test(cleaned)) {
+        return `${cleaned} ${match}`;
+      } else {
+        return cleaned.replace(/(مطعم)/, `$1 ${match}`);
+      }
+    }
+  }
+
+  return address;
+}
+
+/**
  * Generates the complete HTML document for an invoice
  * @param {Object} invoice Invoice object with client, items, taxes
  * @param {Object} company Company details object
@@ -118,15 +148,21 @@ export const generateInvoiceHtml = (invoice, company = {}) => {
   const dir = isArabic ? 'rtl' : 'ltr';
   const t = translations[langKey];
 
-  const currency = escapeHtml(invoice.currency || 'EGP');
-  const statusKey = String(invoice.status || 'DRAFT').toUpperCase();
+  const rawCurrency = String(invoice.currency || 'EGP').toUpperCase();
+  const currencyName = isArabic
+    ? (rawCurrency === 'EGP' ? 'الجنيه المصري' : escapeHtml(rawCurrency))
+    : escapeHtml(rawCurrency);
+  const currencySymbol = isArabic
+    ? (rawCurrency === 'EGP' ? 'ج.م' : escapeHtml(rawCurrency))
+    : escapeHtml(rawCurrency);
+  const rawStatus = String(invoice.status || 'DRAFT').toUpperCase();
+  const statusKey = rawStatus === 'DRAFT' ? 'SENT' : rawStatus;
   const statusLabel = t.statusLabels[statusKey] || statusKey;
 
   const client = invoice.client || {};
   const items = Array.isArray(invoice.items) ? invoice.items : [];
   const taxes = Array.isArray(invoice.taxes) ? invoice.taxes : [];
 
-  // Items table rows
   // Items table rows
   const itemRowsHtml = items
     .map((item, idx) => {
@@ -195,7 +231,7 @@ export const generateInvoiceHtml = (invoice, company = {}) => {
         return `
           <div class="summary-row">
             <span class="summary-label">${escapeHtml(displayTaxName)}:</span>
-            <span class="summary-value" dir="ltr">${taxAmount} ${currency}</span>
+            <span class="summary-value">${taxAmount} ${currencySymbol}</span>
           </div>
         `;
       })
@@ -205,7 +241,7 @@ export const generateInvoiceHtml = (invoice, company = {}) => {
     taxRowsHtml = `
       <div class="summary-row">
         <span class="summary-label">${defaultTaxLabel}:</span>
-        <span class="summary-value" dir="ltr">${formatNumber(invoice.taxTotal)} ${currency}</span>
+        <span class="summary-value">${formatNumber(invoice.taxTotal)} ${currencySymbol}</span>
       </div>
     `;
   }
@@ -216,7 +252,7 @@ export const generateInvoiceHtml = (invoice, company = {}) => {
     discountRowHtml = `
       <div class="summary-row discount-row">
         <span class="summary-label">${t.discount}:</span>
-        <span class="summary-value" dir="ltr">- ${formatNumber(invoice.discount)} ${currency}</span>
+        <span class="summary-value">- ${formatNumber(invoice.discount)} ${currencySymbol}</span>
       </div>
     `;
   }
@@ -650,7 +686,7 @@ export const generateInvoiceHtml = (invoice, company = {}) => {
         ${logoHtml}
         <div class="company-details">
           <div class="company-name">${escapeHtml(company.name || 'Company Name')}</div>
-          ${company.address ? `<div class="company-meta-line">${escapeHtml(company.address)}</div>` : ''}
+          ${company.address ? `<div class="company-meta-line">${escapeHtml(formatAddressForLanguage(company.address, isArabic))}</div>` : ''}
           ${company.phone || company.email ? `
             <div class="company-meta-line">
               ${company.phone ? `${escapeHtml(t.phone)}: <span dir="ltr">${escapeHtml(company.phone)}</span>` : ''}
@@ -687,7 +723,7 @@ export const generateInvoiceHtml = (invoice, company = {}) => {
         ${client.company ? `<div class="client-detail">${escapeHtml(client.company)}</div>` : ''}
         ${client.email ? `<div class="client-detail">${escapeHtml(t.email)}: <span dir="ltr">${escapeHtml(client.email)}</span></div>` : ''}
         ${client.phone ? `<div class="client-detail">${escapeHtml(t.phone)}: <span dir="ltr">${escapeHtml(client.phone)}</span></div>` : ''}
-        ${client.address ? `<div class="client-detail">${escapeHtml(client.address)}</div>` : ''}
+        ${client.address ? `<div class="client-detail">${escapeHtml(formatAddressForLanguage(client.address, isArabic))}</div>` : ''}
         ${client.taxNumber ? `<div class="client-detail">${escapeHtml(t.clientTaxId)}: <span dir="ltr">${escapeHtml(client.taxNumber)}</span></div>` : ''}
       </div>
 
@@ -695,7 +731,7 @@ export const generateInvoiceHtml = (invoice, company = {}) => {
         <div class="section-eyebrow">${escapeHtml(t.invoiceDetails)}</div>
         <div class="billing-meta-row">
           <span class="billing-meta-label">${escapeHtml(t.currency)}:</span>
-          <span class="billing-meta-value" dir="ltr">${currency}</span>
+          <span class="billing-meta-value">${currencyName}</span>
         </div>
         ${invoice.paymentTerms ? `
           <div class="billing-meta-row">
@@ -736,13 +772,13 @@ export const generateInvoiceHtml = (invoice, company = {}) => {
       <div class="totals-box">
         <div class="summary-row">
           <span class="summary-label">${escapeHtml(t.subtotal)}:</span>
-          <span class="summary-value" dir="ltr">${formatNumber(invoice.subtotal)} ${currency}</span>
+          <span class="summary-value">${formatNumber(invoice.subtotal)} ${currencySymbol}</span>
         </div>
         ${discountRowHtml}
         ${taxRowsHtml}
         <div class="grand-total-row">
           <span class="grand-total-label">${escapeHtml(t.grandTotal)}:</span>
-          <span class="grand-total-value" dir="ltr">${formatNumber(invoice.total)} ${currency}</span>
+          <span class="grand-total-value">${formatNumber(invoice.total)} ${currencySymbol}</span>
         </div>
       </div>
     </section>
@@ -758,5 +794,6 @@ export const generateInvoiceHtml = (invoice, company = {}) => {
 
 export default {
   translations,
+  formatAddressForLanguage,
   generateInvoiceHtml,
 };

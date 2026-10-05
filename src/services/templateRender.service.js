@@ -1,7 +1,24 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import {
+  COMPANY_NAME,
+  COMPANY_EMAIL,
+  COMPANY_ADDRESS,
+  COMPANY_PHONE,
+} from '../../config.service.js';
+import { formatAddressForLanguage } from '../utils/invoiceTemplate.util.js';
 
-export const SUPPORTED_PLACEHOLDERS = ['client_name', 'invoice_id', 'total', 'due_date'];
+export const SUPPORTED_PLACEHOLDERS = [
+  'client_name',
+  'invoice_id',
+  'total',
+  'due_date',
+  'company_name',
+  'company_email',
+  'company_address',
+  'company_phone',
+  'current_year',
+];
 
 const TEMPLATES_DIR = path.resolve(process.cwd(), 'templates');
 
@@ -50,7 +67,7 @@ export const validatePlaceholders = (html) => {
   if (unsupported.length > 0) {
     const uniqueUnsupported = [...new Set(unsupported)];
     const error = new Error(
-      `Unsupported placeholder(s) detected: ${uniqueUnsupported.join(', ')}. Only {{client_name}}, {{invoice_id}}, {{total}}, and {{due_date}} are supported.`
+      `Unsupported placeholder(s) detected: ${uniqueUnsupported.join(', ')}. Supported placeholders: ${SUPPORTED_PLACEHOLDERS.map((p) => `{{${p}}}`).join(', ')}.`
     );
     error.cause = 400;
     throw error;
@@ -64,13 +81,18 @@ export const validatePlaceholders = (html) => {
  * @param {string} currency 
  * @returns {string}
  */
-export const formatTotal = (total, currency = 'EGP') => {
+export const formatTotal = (total, currency = 'EGP', language = 'EN') => {
+  const isArabic = String(language).toUpperCase() === 'AR';
   const totalNum = Number(total || 0);
   const formattedNumber = totalNum.toLocaleString('en-US', {
     minimumFractionDigits: totalNum % 1 !== 0 ? 2 : 0,
     maximumFractionDigits: 2,
   });
-  return `${formattedNumber} ${currency || 'EGP'}`;
+  const rawCurrency = String(currency || 'EGP').toUpperCase();
+  const currencyDisplay = isArabic
+    ? (rawCurrency === 'EGP' ? 'ج.م' : currency)
+    : (currency || 'EGP');
+  return `${formattedNumber} ${currencyDisplay}`;
 };
 
 /**
@@ -124,17 +146,28 @@ export const renderEmailTemplate = (html, invoice, language = 'EN') => {
   validatePlaceholders(html);
 
   // 2. Prepare replacement values
+  const isArabic = String(language || invoice.language || '').toUpperCase() === 'AR';
   const clientName = invoice.client?.name || '';
   const invoiceId = invoice.invoiceNumber || '';
-  const total = formatTotal(invoice.total, invoice.currency);
+  const total = formatTotal(invoice.total, invoice.currency, isArabic ? 'AR' : 'EN');
   const dueDate = invoice.dueDate || '';
+  const companyName = COMPANY_NAME || '';
+  const companyEmail = COMPANY_EMAIL || '';
+  const companyAddress = formatAddressForLanguage(COMPANY_ADDRESS || '', isArabic);
+  const companyPhone = COMPANY_PHONE || '';
+  const currentYear = String(new Date().getFullYear());
 
   // 3. Controlled replacements
   let rendered = html
     .replace(/\{\{\s*client_name\s*\}\}/g, clientName)
     .replace(/\{\{\s*invoice_id\s*\}\}/g, invoiceId)
     .replace(/\{\{\s*total\s*\}\}/g, total)
-    .replace(/\{\{\s*due_date\s*\}\}/g, dueDate);
+    .replace(/\{\{\s*due_date\s*\}\}/g, dueDate)
+    .replace(/\{\{\s*company_name\s*\}\}/g, companyName)
+    .replace(/\{\{\s*company_email\s*\}\}/g, companyEmail)
+    .replace(/\{\{\s*company_address\s*\}\}/g, companyAddress)
+    .replace(/\{\{\s*company_phone\s*\}\}/g, companyPhone)
+    .replace(/\{\{\s*current_year\s*\}\}/g, currentYear);
 
   // 4. Apply language and direction
   rendered = applyDirectionAndLanguage(rendered, language);

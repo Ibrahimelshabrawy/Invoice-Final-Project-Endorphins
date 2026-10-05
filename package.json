@@ -13,7 +13,9 @@
     "build": "node -e \"console.log('Build completed')\"",
     "migrate": "node src/migrations/migrate.js",
     "migrate:undo": "node src/migrations/migrate.js --undo",
-    "migrate:status": "node src/migrations/migrate.js --status"
+    "migrate:status": "node src/migrations/migrate.js --status",
+    "admin:dev": "npm --prefix src/adminPanel run dev",
+    "admin:build": "npm --prefix src/adminPanel run build"
   },
   "devDependencies": {
     "cross-env": "^10.1.0",

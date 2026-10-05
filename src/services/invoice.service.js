@@ -527,7 +527,11 @@ export const deleteInvoice = async (id) => {
  */
 export const previewInvoicePdf = async (id) => {
   const invoice = await getInvoiceById(id);
-  const pdfBuffer = await generateInvoicePDFBuffer(invoice);
+  const invoiceForPdf = invoice.toJSON ? invoice.toJSON() : { ...invoice };
+  if (invoiceForPdf.status === InvoiceStatusEnum.DRAFT) {
+    invoiceForPdf.status = InvoiceStatusEnum.SENT;
+  }
+  const pdfBuffer = await generateInvoicePDFBuffer(invoiceForPdf);
   const { tempPdfId, expiresAt, expiresInSeconds } = await tempPdfService.saveTempPdf(pdfBuffer, invoice.id);
 
   return {

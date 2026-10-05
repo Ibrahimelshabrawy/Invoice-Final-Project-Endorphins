@@ -6,6 +6,14 @@ import invoicingRoutes from './routes/invoicingRoutes.js';
 import { startPeriodicCleanup } from './services/tempPdf.service.js';
 import './utils/events/email.event.js';
 
+import path from 'path';
+import { fileURLToPath } from 'url';
+import fs from 'fs';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const adminDistPath = path.join(__dirname, 'adminPanel', 'dist');
+
 const app = express();
 
 const corsOptions = {
@@ -25,6 +33,17 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use('/api/invoicing', invoicingRoutes);
+
+// Serve admin panel static build if built
+if (fs.existsSync(adminDistPath)) {
+    app.use(express.static(adminDistPath));
+    app.use((req, res, next) => {
+        if (req.method === 'GET' && !req.path.startsWith('/api')) {
+            return res.sendFile(path.join(adminDistPath, 'index.html'));
+        }
+        next();
+    });
+}
 
 app.use((err, req, res, next) => {
     let status = typeof err.cause === 'number' ? err.cause : (err.status || 500);
