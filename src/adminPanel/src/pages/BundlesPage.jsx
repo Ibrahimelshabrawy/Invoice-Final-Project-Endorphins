@@ -16,6 +16,8 @@ import Modal from '../components/common/Modal';
 import StatusBadge from '../components/common/StatusBadge';
 import EmptyState from '../components/common/EmptyState';
 import ConfirmDialog from '../components/common/ConfirmDialog';
+import RichTextEditor, { normalizeRichText } from '../components/common/RichTextEditor';
+import RichTextViewer from '../components/common/RichTextViewer';
 import { bundleApi, serviceApi } from '../services/api';
 import { useToast } from '../context/ToastContext';
 
@@ -142,7 +144,7 @@ export default function BundlesPage({ onCountsChanged }) {
 
     const payload = {
       name: formData.name.trim(),
-      description: formData.description.trim() || null,
+      description: normalizeRichText(formData.description),
       price: Number(formData.price),
       serviceIds: formData.serviceIds,
       isActive: formData.isActive,
@@ -315,10 +317,8 @@ export default function BundlesPage({ onCountsChanged }) {
                         </div>
                       </td>
 
-                      <td>
-                        <span style={{ fontSize: '12px', color: 'var(--text-muted)', maxWidth: '240px', display: 'inline-block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          {bundle.description || '—'}
-                        </span>
+                      <td style={{ verticalAlign: 'top', minWidth: '220px', maxWidth: '340px' }}>
+                        <RichTextViewer content={bundle.description} emptyPlaceholder="—" />
                       </td>
 
                       <td style={{ textAlign: 'right' }}>
@@ -502,12 +502,11 @@ export default function BundlesPage({ onCountsChanged }) {
 
           <div className="form-group">
             <label className="form-label">Bundle Description</label>
-            <textarea
-              className="form-textarea"
-              rows={2}
-              placeholder="Package description or scope..."
+            <RichTextEditor
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              onChange={(val) => setFormData((prev) => ({ ...prev, description: val }))}
+              placeholder="Package description, deliverables, or bullet list..."
+              minHeight="115px"
             />
           </div>
 

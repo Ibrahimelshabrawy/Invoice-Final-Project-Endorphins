@@ -36,9 +36,16 @@ app.use('/api/invoicing', invoicingRoutes);
 
 // Serve admin panel static build if built
 if (fs.existsSync(adminDistPath)) {
-    app.use(express.static(adminDistPath));
+    app.use(express.static(adminDistPath, {
+        setHeaders: (res, filePath) => {
+            if (filePath.endsWith('index.html')) {
+                res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+            }
+        }
+    }));
     app.use((req, res, next) => {
         if (req.method === 'GET' && !req.path.startsWith('/api')) {
+            res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
             return res.sendFile(path.join(adminDistPath, 'index.html'));
         }
         next();

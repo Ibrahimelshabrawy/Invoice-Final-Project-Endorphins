@@ -157,11 +157,12 @@ export const calculateInvoiceItemsAndTaxes = async (
         }
 
         const unitPrice = Number(entity[config.priceField]);
-        const description = entity.description || entity.name;
+        const description = entity.description || '';
 
         const lineTotal = Number((qty * unitPrice).toFixed(2));
 
         processedItems.push({
+            name: entity.name,
             itemType,
             refId: Number(refId),
             description,

@@ -15,7 +15,8 @@ export const translations = {
     clientTaxId: 'Tax ID',
     currency: 'Currency',
     paymentTerms: 'Payment Terms',
-    description: 'Description',
+    description: 'Item',
+    item: 'Item',
     type: 'Type',
     quantity: 'Qty',
     unitPrice: 'Unit Price',
@@ -53,7 +54,8 @@ export const translations = {
     clientTaxId: 'الرقم الضريبي',
     currency: 'العملة',
     paymentTerms: 'شروط الدفع',
-    description: 'الوصف',
+    description: 'البند',
+    item: 'البند',
     type: 'النوع',
     quantity: 'الكمية',
     unitPrice: 'سعر الوحدة',
@@ -93,6 +95,27 @@ function escapeHtml(str) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+}
+
+/**
+ * Safely renders rich text description in HTML template, preserving safe formatting tags (p, ul, ol, li, strong, b, em, i)
+ */
+function renderDescriptionHtml(desc) {
+  if (desc === null || desc === undefined) return '';
+  const str = String(desc);
+  if (!/<[a-z][\s\S]*>/i.test(str)) {
+    return escapeHtml(str);
+  }
+
+  const allowedTags = ['p', 'br', 'ul', 'ol', 'li', 'strong', 'b', 'em', 'i', 'span'];
+  return str.replace(/<\/?([a-zA-Z0-9]+)[^>]*>/g, (match, tag) => {
+    const lower = tag.toLowerCase();
+    if (allowedTags.includes(lower)) {
+      const isClosing = match.startsWith('</');
+      return isClosing ? `</${lower}>` : `<${lower}>`;
+    }
+    return escapeHtml(match);
+  });
 }
 
 /**
@@ -168,7 +191,8 @@ export const generateInvoiceHtml = (invoice, company = {}) => {
     .map((item, idx) => {
       const typeKey = String(item.itemType || 'SERVICE').toUpperCase();
       const typeLabel = t.types[typeKey] || typeKey;
-      const desc = escapeHtml(item.description || `Item #${item.refId || idx + 1}`);
+      const itemName = (item.name || '').trim();
+      const desc = renderDescriptionHtml(item.description || (!itemName ? `Item #${item.refId || idx + 1}` : ''));
       const qty = formatNumber(item.quantity);
       const unitPrice = formatNumber(item.unitPrice);
       const lineTotal = formatNumber(item.lineTotal);
@@ -176,7 +200,8 @@ export const generateInvoiceHtml = (invoice, company = {}) => {
       return `
         <tr>
           <td class="col-desc">
-            <div class="item-name">${desc}</div>
+            ${itemName ? `<div class="item-title">${escapeHtml(itemName)}</div>` : ''}
+            ${desc && desc !== itemName ? `<div class="item-desc">${desc}</div>` : ''}
           </td>
           <td class="col-type"><span class="type-pill">${escapeHtml(typeLabel)}</span></td>
           <td class="col-qty"><span class="cell-num">${qty}</span></td>
@@ -517,9 +542,35 @@ export const generateInvoiceHtml = (invoice, company = {}) => {
       width: 44%;
     }
 
-    .item-name {
-      font-weight: 500;
+    .item-title {
+      font-weight: 700;
       color: #111827;
+      font-size: 11px;
+      margin-bottom: 2px;
+    }
+
+    .item-desc, .item-name {
+      font-weight: 400;
+      color: #4b5563;
+      font-size: 10px;
+      line-height: 1.4;
+    }
+
+    .item-desc ul, .item-desc ol, .item-name ul, .item-name ol {
+      margin: 3px 0;
+      padding-inline-start: 16px;
+    }
+
+    .item-desc li, .item-name li {
+      margin-bottom: 2px;
+    }
+
+    .item-desc p, .item-name p {
+      margin: 0 0 3px 0;
+    }
+
+    .item-desc p:last-child, .item-name p:last-child {
+      margin-bottom: 0;
     }
 
     .col-type {

@@ -18,6 +18,8 @@ import Modal from '../components/common/Modal';
 import StatusBadge from '../components/common/StatusBadge';
 import EmptyState from '../components/common/EmptyState';
 import ConfirmDialog from '../components/common/ConfirmDialog';
+import RichTextEditor, { normalizeRichText } from '../components/common/RichTextEditor';
+import RichTextViewer from '../components/common/RichTextViewer';
 import { serviceApi, categoryApi } from '../services/api';
 import { useToast } from '../context/ToastContext';
 
@@ -133,7 +135,7 @@ export default function ServicesPage({ onCountsChanged }) {
 
     const payload = {
       name: formData.name.trim(),
-      description: formData.description.trim() || null,
+      description: normalizeRichText(formData.description),
       unitPrice: Number(formData.unitPrice),
       unitType: formData.unitType,
       categoryId: Number(formData.categoryId),
@@ -305,9 +307,9 @@ export default function ServicesPage({ onCountsChanged }) {
                       <div style={{ display: 'flex', flexDirection: 'column' }}>
                         <strong style={{ color: 'var(--text-primary)', fontSize: '13.5px' }}>{service.name}</strong>
                         {service.description && (
-                          <span style={{ fontSize: '11.5px', color: 'var(--text-muted)', maxWidth: '280px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                            {service.description}
-                          </span>
+                          <div style={{ marginTop: '4px', maxWidth: '320px' }}>
+                            <RichTextViewer content={service.description} />
+                          </div>
                         )}
                       </div>
                     </td>
@@ -484,12 +486,11 @@ export default function ServicesPage({ onCountsChanged }) {
 
           <div className="form-group">
             <label className="form-label">Service Description</label>
-            <textarea
-              className="form-textarea"
-              rows={3}
-              placeholder="Detailed scope or deliverables..."
+            <RichTextEditor
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              onChange={(val) => setFormData((prev) => ({ ...prev, description: val }))}
+              placeholder="Detailed scope, deliverables, or bullet list..."
+              minHeight="115px"
             />
           </div>
 

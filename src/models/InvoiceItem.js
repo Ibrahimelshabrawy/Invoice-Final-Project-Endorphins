@@ -31,6 +31,10 @@ InvoiceItem.init(
       field: 'ref_id',
       comment: 'References services.id or bundles.id based on item_type',
     },
+    name: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+    },
     description: {
       type: DataTypes.TEXT,
       allowNull: false,

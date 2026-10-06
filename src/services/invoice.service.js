@@ -94,6 +94,7 @@ export const createInvoice = async (data) => {
     if (processedItems.length > 0) {
       const itemsData = processedItems.map((pItem) => ({
         invoiceId: invoice.id,
+        name: pItem.name,
         itemType: pItem.itemType,
         refId: pItem.refId,
         description: pItem.description,
@@ -355,6 +356,7 @@ export const updateInvoice = async (id, data) => {
       if (processedItems.length > 0) {
         const itemsData = processedItems.map((pItem) => ({
           invoiceId: invoice.id,
+          name: pItem.name,
           itemType: pItem.itemType,
           refId: pItem.refId,
           description: pItem.description,
